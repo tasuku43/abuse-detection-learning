@@ -100,6 +100,19 @@ feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -
 
 詳細な進め方は `docs/agent_workflow.md` を参照します。
 
+## セッション再開時の手順
+
+ユーザーが「続きから始めよう」「前回の続き」などと言った場合は、まず現在地を復元します。
+
+最低限、次を確認します。
+
+1. `git status --short`
+2. `docs/tasks.md`
+3. `docs/progress/` の最新日付ファイル
+4. 未コミット変更の内容
+
+未コミット変更がある場合は、勝手に完成扱いせず、何が作成途中かを説明してから再開します。
+
 ## 推奨リポジトリ構成
 
 ```text
