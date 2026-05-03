@@ -3,6 +3,11 @@ from __future__ import annotations
 from abuse_detection.schema import ScoringFeatureRow
 
 
+SCORING_FN_VERSION = "rule_baseline_v001"
+SCORING_FN_CONSERVATIVE_VERSION = "rule_conservative_v001"
+SCORING_FN_RECALL_HEAVY_VERSION = "rule_recall_heavy_v001"
+
+
 def _num(features: ScoringFeatureRow, name: str) -> float:
     return float(features[name])  # type: ignore[literal-required]
 

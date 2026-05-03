@@ -98,7 +98,8 @@
 - [x] model artifact の metadata を保存する
 - [x] ML baseline に train / validation split を追加する
 - [x] validation rows で saved model を評価できるようにする
-- [ ] scoring_fn / model の versioning を考える
+- [x] scoring_fn / model の versioning を考える
+- [x] 評価結果に `score_source` / `score_version` を付けられるようにする
 - [x] negative sampling を考える
 - [x] stable negative candidate を選ぶ helper を作る
 - [x] negative sampling の除外理由を観察する script を作る

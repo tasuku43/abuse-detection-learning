@@ -4,6 +4,7 @@ from abuse_detection.evaluation import evaluate_feature_rows
 from abuse_detection.ml_baseline import (
     build_ml_model_metadata,
     load_ml_model,
+    load_ml_model_metadata,
     save_ml_model,
     split_train_validation,
     train_ml_baseline,
@@ -68,6 +69,21 @@ def test_saved_ml_baseline_can_be_loaded_and_evaluated(tmp_path) -> None:
     assert metrics.loc[0, "threshold"] == 80
     assert 0 <= metadata["precision_at_threshold"] <= 1
     assert 0 <= metadata["recall_at_threshold"] <= 1
+
+
+def test_saved_ml_baseline_metadata_can_be_loaded(tmp_path) -> None:
+    feature_rows = pd.read_csv("fixtures/feature_rows_sample.csv")
+    model = train_ml_baseline(feature_rows)
+    save_ml_model(
+        model,
+        tmp_path / "ml_baseline_test",
+        metadata={"model_version": "test"},
+    )
+
+    metadata = load_ml_model_metadata(tmp_path / "ml_baseline_test")
+
+    assert metadata["model_name"] == "ml_baseline"
+    assert metadata["model_version"] == "test"
 
 
 def test_train_validation_split_preserves_label_balance() -> None:

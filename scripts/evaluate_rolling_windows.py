@@ -5,9 +5,10 @@ import argparse
 import pandas as pd
 
 from abuse_detection.evaluation import evaluate_feature_rows
-from abuse_detection.ml_baseline import load_ml_model
+from abuse_detection.evaluation import ScoreSource
+from abuse_detection.ml_baseline import load_ml_model, load_ml_model_metadata
 from abuse_detection.rolling_window import rolling_window_metrics
-from abuse_detection.scoring import scoring_fn
+from abuse_detection.scoring import SCORING_FN_VERSION, scoring_fn
 
 
 def main() -> None:
@@ -45,13 +46,20 @@ def main() -> None:
 
     feature_rows = pd.read_csv(args.feature_rows)
     score_fn = scoring_fn
+    score_source = ScoreSource(name="rule_based", version=SCORING_FN_VERSION)
     if args.score_source == "ml":
+        metadata = load_ml_model_metadata(args.artifact_dir)
         score_fn = load_ml_model(args.artifact_dir).score_row
+        score_source = ScoreSource(
+            name=str(metadata.get("model_name", "unknown_model")),
+            version=str(metadata.get("model_version", "unknown_version")),
+        )
 
     scored_rows, _ = evaluate_feature_rows(
         feature_rows,
         thresholds=[args.threshold],
         score_fn=score_fn,
+        score_source=score_source,
     )
     metrics = rolling_window_metrics(
         scored_rows,

@@ -2,6 +2,7 @@ import pandas as pd
 import pytest
 
 from abuse_detection.evaluation import (
+    ScoreSource,
     add_risk_scores,
     evaluate_feature_rows,
     false_negatives,
@@ -42,3 +43,19 @@ def test_error_analysis_helpers_return_expected_rows() -> None:
     assert len(fns) > 0
     assert set(fps["label_value"]) == {0}
     assert set(fns["label_value"]) == {1}
+
+
+def test_evaluation_can_attach_score_source_and_version() -> None:
+    feature_rows = pd.read_csv("fixtures/feature_rows_sample.csv")
+    score_source = ScoreSource(name="rule_based", version="rule_baseline_v001")
+
+    scored_rows, metrics = evaluate_feature_rows(
+        feature_rows,
+        thresholds=[80],
+        score_source=score_source,
+    )
+
+    assert set(scored_rows["score_source"]) == {"rule_based"}
+    assert set(scored_rows["score_version"]) == {"rule_baseline_v001"}
+    assert set(metrics["score_source"]) == {"rule_based"}
+    assert set(metrics["score_version"]) == {"rule_baseline_v001"}

@@ -37,6 +37,9 @@ ML_FEATURE_COLUMNS: tuple[str, ...] = (
     *CATEGORICAL_FEATURE_COLUMNS,
 )
 
+ML_BASELINE_MODEL_NAME = "ml_baseline"
+DEFAULT_ML_BASELINE_VERSION = "v001"
+
 
 @dataclass(frozen=True)
 class MLScoringModel:
@@ -142,7 +145,7 @@ def save_ml_model(
     joblib.dump(model, model_path)
 
     metadata_payload: dict[str, object] = {
-        "model_name": "ml_baseline",
+        "model_name": ML_BASELINE_MODEL_NAME,
         "model_type": "logistic_regression",
         "created_at": datetime.now(UTC).isoformat(),
         "feature_columns": list(ML_FEATURE_COLUMNS),
@@ -167,6 +170,12 @@ def load_ml_model(artifact_dir: str | Path) -> MLScoringModel:
     if not isinstance(loaded, MLScoringModel):
         raise TypeError(f"Expected MLScoringModel in {model_path}")
     return loaded
+
+
+def load_ml_model_metadata(artifact_dir: str | Path) -> dict[str, object]:
+    """Load metadata saved next to a model artifact."""
+    metadata_path = Path(artifact_dir) / "metadata.json"
+    return json.loads(metadata_path.read_text(encoding="utf-8"))
 
 
 def build_ml_model_metadata(

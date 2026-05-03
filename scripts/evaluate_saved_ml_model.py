@@ -7,7 +7,8 @@ from pathlib import Path
 import pandas as pd
 
 from abuse_detection.evaluation import evaluate_feature_rows
-from abuse_detection.ml_baseline import load_ml_model
+from abuse_detection.evaluation import ScoreSource
+from abuse_detection.ml_baseline import load_ml_model, load_ml_model_metadata
 
 
 def main() -> None:
@@ -33,17 +34,25 @@ def main() -> None:
 
     artifact_dir = Path(args.artifact_dir)
     model = load_ml_model(artifact_dir)
+    metadata = load_ml_model_metadata(artifact_dir)
     feature_rows = pd.read_csv(args.feature_rows)
     if args.validation_only:
         from abuse_detection.ml_baseline import split_train_validation
 
         split = split_train_validation(feature_rows)
         feature_rows = split.validation_rows
-    scored_rows, metrics = evaluate_feature_rows(feature_rows, score_fn=model.score_row)
+    score_source = ScoreSource(
+        name=str(metadata.get("model_name", "unknown_model")),
+        version=str(metadata.get("model_version", "unknown_version")),
+    )
+    scored_rows, metrics = evaluate_feature_rows(
+        feature_rows,
+        score_fn=model.score_row,
+        score_source=score_source,
+    )
 
     metadata_path = artifact_dir / "metadata.json"
     if metadata_path.exists():
-        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
         print(
             "model:",
             metadata.get("model_name"),
