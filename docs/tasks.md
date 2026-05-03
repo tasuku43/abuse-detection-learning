@@ -9,24 +9,27 @@
 - [x] roadmap を作る
 - [x] progress log を作る
 - [x] task list を作る
+- [x] 実装前説明を省略しないための pre-implementation checklist を作る
 
 ## Phase 1: Minimal Evaluation Harness
 
-- [ ] `pyproject.toml` を作る
-- [ ] `src/abuse_detection/__init__.py` を作る
-- [ ] `src/abuse_detection/schema.py` で必須カラムを定義する
-- [ ] `src/abuse_detection/scoring.py` で `scoring_fn` を作る
-- [ ] `src/abuse_detection/metrics.py` で precision / recall を計算する
-- [ ] `src/abuse_detection/evaluation.py` で評価 pipeline を作る
-- [ ] `fixtures/feature_rows_sample.csv` を作る
-- [ ] `tests/test_schema.py` を作る
-- [ ] `tests/test_scoring.py` を作る
-- [ ] `tests/test_metrics.py` を作る
-- [ ] `tests/test_evaluation.py` を作る
-- [ ] `pytest -q` を通す
+- [x] `pyproject.toml` を作る
+- [x] `src/abuse_detection/__init__.py` を作る
+- [x] `src/abuse_detection/schema.py` で必須カラムを定義する
+- [x] `src/abuse_detection/scoring.py` で `scoring_fn` を作る
+- [x] `src/abuse_detection/metrics.py` で precision / recall を計算する
+- [x] `src/abuse_detection/evaluation.py` で評価 pipeline を作る
+- [x] `fixtures/feature_rows_sample.csv` を作る
+- [x] `tests/test_schema.py` を作る
+- [x] `tests/test_scoring.py` を作る
+- [x] `tests/test_metrics.py` を作る
+- [x] `tests/test_evaluation.py` を作る
+- [x] `pytest -q` を通す
+- [x] Mermaid 図で evaluation flow を説明する doc を作る
 
 ## Phase 2: Notebook Workflow
 
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
 - [ ] `notebooks/01_evaluate_scoring.ipynb` を作る
 - [ ] fixture CSV を読み込む
 - [ ] `scoring_fn` を適用する
@@ -37,6 +40,7 @@
 
 ## Phase 3: dbt Skeleton
 
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
 - [ ] `dbt/dbt_project.yml` を作る
 - [ ] staging model skeleton を作る
 - [ ] human label source skeleton を作る
@@ -47,6 +51,7 @@
 
 ## Phase 4: Error Analysis
 
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
 - [ ] false positives を取り出す helper を作る
 - [ ] false negatives を取り出す helper を作る
 - [ ] score bucket ごとの観察方法を考える

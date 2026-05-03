@@ -1,0 +1,7 @@
+user_id,as_of_time,label_value,account_age_minutes,contacts_24h,messages_1h,profile_updates_24h,plan
+synthetic_abuse_clear,2026-05-01T10:00:00Z,1,12,120,90,6,free
+synthetic_legit_clear,2026-05-01T10:00:00Z,0,43200,3,1,0,paid
+synthetic_fp_like_growth,2026-05-01T10:00:00Z,0,45,90,70,5,free
+synthetic_fn_like_sleeper,2026-05-01T10:00:00Z,1,28800,8,4,1,paid
+synthetic_abuse_medium,2026-05-01T10:00:00Z,1,180,85,65,5,free
+synthetic_legit_new_paid,2026-05-01T10:00:00Z,0,30,5,3,1,paid
