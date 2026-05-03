@@ -102,5 +102,9 @@
 - [x] negative sampling を考える
 - [x] stable negative candidate を選ぶ helper を作る
 - [x] negative sampling の除外理由を観察する script を作る
-- [ ] rolling window evaluation を考える
-- [ ] score calibration を考える
+- [x] rolling window evaluation を考える
+- [x] `as_of_time` window ごとの metrics helper を作る
+- [x] rolling window 評価 script を作る
+- [x] score calibration を考える
+- [x] score bucket ごとの observed positive rate を見る helper を作る
+- [x] calibration と threshold sweep の違いを docs にまとめる
