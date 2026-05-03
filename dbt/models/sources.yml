@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: learning_raw
+    description: Synthetic placeholder for raw data normally queried from a warehouse.
+    tables:
+      - name: account_attributes
+        description: Account records used to attach account age and plan.
+      - name: user_behavior_logs
+        description: User action logs used to build point-in-time features.
+      - name: operator_action_logs
+        description: Human review outcomes and automated actions used to derive labels.

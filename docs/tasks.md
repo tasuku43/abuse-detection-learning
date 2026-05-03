@@ -46,14 +46,29 @@
 
 ## Phase 3: dbt Skeleton
 
+- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] `dbt/dbt_project.yml` を作る
+- [x] staging model skeleton を作る
+- [x] human label source skeleton を作る
+- [x] evaluation target skeleton を作る
+- [x] point-in-time feature row skeleton を作る
+- [x] 自動検知システムの停止結果を teacher label に混ぜない方針を書く
+- [x] `event_time < as_of_time` の未来情報防止を表現する
+- [x] Phase 3 の学びを docs にまとめる
+
+## Phase 3.5: Local SQLite Warehouse
+
 - [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
-- [ ] `dbt/dbt_project.yml` を作る
-- [ ] staging model skeleton を作る
-- [ ] human label source skeleton を作る
-- [ ] evaluation target skeleton を作る
-- [ ] point-in-time feature row skeleton を作る
-- [ ] auto actor の停止結果を teacher label に混ぜない方針を書く
-- [ ] `event_time < as_of_time` の未来情報防止を表現する
+- [ ] SQLite raw table schema を作る
+- [ ] synthetic account attributes を seed する
+- [ ] synthetic user behavior logs を seed する
+- [ ] synthetic operator action logs を seed する
+- [ ] human label source 相当の SQL を作る
+- [ ] evaluation target 相当の SQL を作る
+- [ ] point-in-time feature row SQL を作る
+- [ ] SQLite から feature rows CSV を書き出す script を作る
+- [ ] 生成した feature rows を既存 evaluation harness で評価する
+- [ ] SQLite warehouse の学びを docs にまとめる
 
 ## Phase 4: Error Analysis
 

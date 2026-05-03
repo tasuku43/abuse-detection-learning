@@ -74,9 +74,9 @@ abuse-detection-learning/
     dbt_project.yml
     models/
       staging/
-        stg_business_events.sql
-        stg_td_events.sql
-        stg_users.sql
+        stg_account_attributes.sql
+        stg_user_behavior_logs.sql
+        stg_operator_action_logs.sql
       labels/
         label_events_human.sql
       features/

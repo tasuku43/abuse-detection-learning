@@ -1,0 +1,16 @@
+name: abuse_detection_learning
+version: "0.1.0"
+config-version: 2
+
+profile: abuse_detection_learning
+
+model-paths: ["models"]
+
+models:
+  abuse_detection_learning:
+    staging:
+      +materialized: view
+    labels:
+      +materialized: view
+    features:
+      +materialized: table

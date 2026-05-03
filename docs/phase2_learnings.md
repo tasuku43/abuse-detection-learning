@@ -143,14 +143,13 @@ Phase 3 に進む前に、feature row がどこから来るのかを考えます
 
 具体的には dbt skeleton で、次を表現します。
 
-* raw event から staging model を作る
-* human operator の停止イベントから label source を作る
+* raw data から staging model を作る
+* オペレーター操作ログから label source を作る
 * evaluation target を作る
 * `user_id + as_of_time` の粒度で feature row を作る
 * `event_time < as_of_time` により未来情報の混入を防ぐ
-* auto actor の停止結果を teacher label に混ぜない
+* 自動検知システムの停止結果を teacher label に混ぜない
 
 Phase 1 と Phase 2 では、すでに feature row が存在する前提で評価しました。
 
 Phase 3 では、その feature row をどう作るべきかを SQL skeleton として表現します。
-
