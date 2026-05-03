@@ -81,19 +81,26 @@
 
 ## Phase 5: ML Baseline
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
-- [ ] `src/abuse_detection/ml_baseline.py` を作る
-- [ ] logistic regression で fixture feature rows を学習する
-- [ ] ML model の出力を 0 から 100 の `risk_score` に変換する
-- [ ] `tests/test_ml_baseline.py` を作る
-- [ ] rule-based scoring_fn と ML-based scoring_fn を同じ evaluation harness で比較する
-- [ ] `notebooks/02_compare_rule_vs_ml.ipynb` を作る
-- [ ] false positives / false negatives を rule-based と ML-based で比較する
-- [ ] ML baseline の学びを docs にまとめる
+- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] `src/abuse_detection/ml_baseline.py` を作る
+- [x] logistic regression で fixture feature rows を学習する
+- [x] ML model の出力を 0 から 100 の `risk_score` に変換する
+- [x] `tests/test_ml_baseline.py` を作る
+- [x] rule-based scoring_fn と ML-based scoring_fn を同じ evaluation harness で比較する
+- [x] `notebooks/02_compare_rule_vs_ml.ipynb` を作る
+- [x] false positives / false negatives を rule-based と ML-based で比較する
+- [x] ML baseline の学びを docs にまとめる
 
 ## Phase 6: Iteration Ideas
 
-- [ ] scoring_fn の versioning を考える
-- [ ] negative sampling を考える
+- [x] ML baseline をファイルベースで保存する
+- [x] 保存済み ML baseline を読み込んで評価する
+- [x] model artifact の metadata を保存する
+- [x] ML baseline に train / validation split を追加する
+- [x] validation rows で saved model を評価できるようにする
+- [ ] scoring_fn / model の versioning を考える
+- [x] negative sampling を考える
+- [x] stable negative candidate を選ぶ helper を作る
+- [x] negative sampling の除外理由を観察する script を作る
 - [ ] rolling window evaluation を考える
 - [ ] score calibration を考える

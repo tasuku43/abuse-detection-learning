@@ -17,6 +17,8 @@ venv/
 .env
 .env.*
 data/*.sqlite
+models/*/
+!models/.gitkeep
 
 # OS / editor
 .DS_Store
