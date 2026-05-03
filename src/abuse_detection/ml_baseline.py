@@ -129,6 +129,33 @@ def split_train_validation(
     )
 
 
+def split_train_validation_by_time(
+    feature_rows: pd.DataFrame,
+    *,
+    validation_start: str,
+    time_column: str = "as_of_time",
+) -> TrainValidationSplit:
+    """Split rows into past training rows and future validation rows."""
+    validate_feature_rows(feature_rows)
+    rows = feature_rows.copy()
+    rows[time_column] = pd.to_datetime(rows[time_column], utc=True)
+    cutoff = pd.Timestamp(validation_start)
+    if cutoff.tzinfo is None:
+        cutoff = cutoff.tz_localize("UTC")
+    else:
+        cutoff = cutoff.tz_convert("UTC")
+
+    train_rows = rows[rows[time_column] < cutoff]
+    validation_rows = rows[rows[time_column] >= cutoff]
+    if train_rows.empty or validation_rows.empty:
+        raise ValueError("time split must produce non-empty train and validation rows")
+
+    return TrainValidationSplit(
+        train_rows=train_rows.reset_index(drop=True),
+        validation_rows=validation_rows.reset_index(drop=True),
+    )
+
+
 def save_ml_model(
     model: MLScoringModel,
     artifact_dir: str | Path,

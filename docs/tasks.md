@@ -109,3 +109,10 @@
 - [x] score calibration を考える
 - [x] score bucket ごとの observed positive rate を見る helper を作る
 - [x] calibration と threshold sweep の違いを docs にまとめる
+
+## Phase 7: Practical Evaluation Improvements
+
+- [x] 複数時点の synthetic feature rows fixture を作る
+- [x] rolling window evaluation を複数 window で確認できるようにする
+- [x] ML baseline に time-based train / validation split を追加する
+- [x] Phase 7 の学びを docs にまとめる

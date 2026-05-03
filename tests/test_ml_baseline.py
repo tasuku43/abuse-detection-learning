@@ -7,6 +7,7 @@ from abuse_detection.ml_baseline import (
     load_ml_model_metadata,
     save_ml_model,
     split_train_validation,
+    split_train_validation_by_time,
     train_ml_baseline,
 )
 
@@ -93,6 +94,24 @@ def test_train_validation_split_preserves_label_balance() -> None:
 
     assert len(split.train_rows) == 70
     assert len(split.validation_rows) == 30
+    assert set(split.train_rows["label_value"]) == {0, 1}
+    assert set(split.validation_rows["label_value"]) == {0, 1}
+
+
+def test_time_based_train_validation_split_uses_future_rows_for_validation() -> None:
+    feature_rows = pd.read_csv("fixtures/feature_rows_timeseries.csv")
+
+    split = split_train_validation_by_time(
+        feature_rows,
+        validation_start="2026-05-15T00:00:00Z",
+    )
+
+    assert len(split.train_rows) == 200
+    assert len(split.validation_rows) == 200
+    assert split.train_rows["as_of_time"].max() < pd.Timestamp("2026-05-15T00:00:00Z")
+    assert split.validation_rows["as_of_time"].min() >= pd.Timestamp(
+        "2026-05-15T00:00:00Z"
+    )
     assert set(split.train_rows["label_value"]) == {0, 1}
     assert set(split.validation_rows["label_value"]) == {0, 1}
 

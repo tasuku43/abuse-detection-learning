@@ -9,6 +9,7 @@ from abuse_detection.ml_baseline import (
     build_ml_model_metadata,
     save_ml_model,
     split_train_validation,
+    split_train_validation_by_time,
     train_ml_baseline,
 )
 
@@ -45,6 +46,17 @@ def main() -> None:
         help="Fraction of rows held out for validation metadata.",
     )
     parser.add_argument(
+        "--split-strategy",
+        choices=["random", "time"],
+        default="random",
+        help="Use random stratified split or past/future time split.",
+    )
+    parser.add_argument(
+        "--validation-start",
+        default=None,
+        help="Start timestamp for validation rows when --split-strategy=time.",
+    )
+    parser.add_argument(
         "--random-state",
         type=int,
         default=0,
@@ -54,11 +66,19 @@ def main() -> None:
 
     feature_rows_path = Path(args.feature_rows)
     feature_rows = pd.read_csv(feature_rows_path)
-    split = split_train_validation(
-        feature_rows,
-        validation_size=args.validation_size,
-        random_state=args.random_state,
-    )
+    if args.split_strategy == "time":
+        if args.validation_start is None:
+            raise ValueError("--validation-start is required for --split-strategy=time")
+        split = split_train_validation_by_time(
+            feature_rows,
+            validation_start=args.validation_start,
+        )
+    else:
+        split = split_train_validation(
+            feature_rows,
+            validation_size=args.validation_size,
+            random_state=args.random_state,
+        )
     model = train_ml_baseline(split.train_rows)
     metadata = build_ml_model_metadata(
         split.train_rows,
@@ -67,9 +87,12 @@ def main() -> None:
         model_version=args.model_version,
         threshold=args.threshold,
         validation_rows=split.validation_rows,
-        validation_size=args.validation_size,
-        random_state=args.random_state,
+        validation_size=args.validation_size if args.split_strategy == "random" else None,
+        random_state=args.random_state if args.split_strategy == "random" else None,
     )
+    metadata["split_strategy"] = args.split_strategy
+    if args.validation_start is not None:
+        metadata["validation_start"] = args.validation_start
     artifact = save_ml_model(model, args.artifact_dir, metadata=metadata)
 
     print(f"saved model: {artifact.model_path}")
