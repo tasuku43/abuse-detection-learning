@@ -63,9 +63,21 @@
 - [ ] score bucket ごとの観察方法を考える
 - [ ] scoring_fn 改善メモを残す
 
-## Phase 5: Iteration Ideas
+## Phase 5: ML Baseline
+
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] `src/abuse_detection/ml_baseline.py` を作る
+- [ ] logistic regression で fixture feature rows を学習する
+- [ ] ML model の出力を 0 から 100 の `risk_score` に変換する
+- [ ] `tests/test_ml_baseline.py` を作る
+- [ ] rule-based scoring_fn と ML-based scoring_fn を同じ evaluation harness で比較する
+- [ ] `notebooks/02_compare_rule_vs_ml.ipynb` を作る
+- [ ] false positives / false negatives を rule-based と ML-based で比較する
+- [ ] ML baseline の学びを docs にまとめる
+
+## Phase 6: Iteration Ideas
 
 - [ ] scoring_fn の versioning を考える
 - [ ] negative sampling を考える
 - [ ] rolling window evaluation を考える
-- [ ] simple ML model との比較を考える
+- [ ] score calibration を考える
