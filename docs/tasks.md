@@ -29,14 +29,20 @@
 
 ## Phase 2: Notebook Workflow
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
-- [ ] `notebooks/01_evaluate_scoring.ipynb` を作る
-- [ ] fixture CSV を読み込む
-- [ ] `scoring_fn` を適用する
-- [ ] threshold 0 から 100 まで 10 刻みで sweep する
-- [ ] precision / recall を表で表示する
-- [ ] threshold 80 の false positives / false negatives を表示する
-- [ ] scoring_fn / feature 改善候補を考察する
+- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] `notebooks/01_evaluate_scoring.ipynb` を作る
+- [x] fixture CSV を読み込む
+- [x] `scoring_fn` を適用する
+- [x] threshold 0 から 100 まで 10 刻みで sweep する
+- [x] precision / recall を表で表示する
+- [x] threshold 80 の false positives / false negatives を表示する
+- [x] scoring_fn / feature 改善候補を考察する
+- [x] fixture CSV の合成データを増やす
+- [x] fixture CSV を100件の合成ユーザーに増やす
+- [x] account takeover / spam 観察用の特徴量を追加する
+- [x] 複数の scoring_fn 候補を作る
+- [x] 単一 notebook で scoring_fn 候補を比較する
+- [x] Phase 2 の学びを docs にまとめる
 
 ## Phase 3: dbt Skeleton
 

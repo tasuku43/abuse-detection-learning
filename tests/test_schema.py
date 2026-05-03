@@ -11,6 +11,12 @@ def test_missing_required_columns_detects_absent_columns() -> None:
         "contacts_24h",
         "messages_1h",
         "profile_updates_24h",
+        "device_count_24h",
+        "failed_login_count_24h",
+        "login_country_changes_24h",
+        "password_reset_24h",
+        "recipient_block_rate_24h",
+        "message_link_ratio_1h",
         "plan",
     ]
 
@@ -20,4 +26,3 @@ def test_validate_feature_rows_raises_for_missing_columns() -> None:
 
     with pytest.raises(ValueError, match="Missing required feature columns"):
         validate_feature_rows(feature_rows)
-

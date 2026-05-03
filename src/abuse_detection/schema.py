@@ -13,6 +13,12 @@ class ScoringFeatureRow(TypedDict):
     contacts_24h: int | float
     messages_1h: int | float
     profile_updates_24h: int | float
+    device_count_24h: int | float
+    failed_login_count_24h: int | float
+    login_country_changes_24h: int | float
+    password_reset_24h: int | float
+    recipient_block_rate_24h: int | float
+    message_link_ratio_1h: int | float
     plan: str
 
 
@@ -32,6 +38,12 @@ REQUIRED_FEATURE_COLUMNS: tuple[str, ...] = (
     "contacts_24h",
     "messages_1h",
     "profile_updates_24h",
+    "device_count_24h",
+    "failed_login_count_24h",
+    "login_country_changes_24h",
+    "password_reset_24h",
+    "recipient_block_rate_24h",
+    "message_link_ratio_1h",
     "plan",
 )
 
