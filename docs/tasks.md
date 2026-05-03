@@ -116,3 +116,11 @@
 - [x] rolling window evaluation を複数 window で確認できるようにする
 - [x] ML baseline に time-based train / validation split を追加する
 - [x] Phase 7 の学びを docs にまとめる
+
+## Learning Review
+
+- [x] Phase 0〜7 の学びを `docs/learning_review.md` にまとめる
+
+## Production Gap Analysis
+
+- [x] 学習 repo と本番システムの差分を `docs/production_gap_analysis.md` にまとめる
