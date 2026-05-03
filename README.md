@@ -60,12 +60,14 @@ abuse-detection-learning/
 
   fixtures/
     feature_rows_sample.csv
+    feature_rows_from_sqlite.csv
 
   tests/
     test_scoring.py
     test_metrics.py
     test_evaluation.py
     test_schema.py
+    test_sqlite_warehouse.py
 
   notebooks/
     01_evaluate_scoring.ipynb
@@ -82,6 +84,17 @@ abuse-detection-learning/
       features/
         evaluation_targets.sql
         fct_abuse_feature_rows.sql
+
+  scripts/
+    build_sqlite_warehouse.py
+    export_sqlite_feature_rows.py
+
+  sql/
+    sqlite/
+      human_label_source.sql
+      evaluation_targets.sql
+      feature_rows.sql
+      labeled_feature_rows.sql
 ```
 
 ## 各要素の役割
@@ -105,6 +118,18 @@ notebook は、実験・観察・理解のための作業台です。scoring log
 将来的な特徴量生成SQLの置き場所です。
 
 最初は実DBに接続せず、conceptual skeleton として使います。
+
+### `scripts/` と `sql/sqlite/`
+
+ローカル SQLite を使い、合成 raw table から feature rows CSV を作るための教材です。
+
+単一DBの中で `app_*`、`warehouse_*`、`eval_*` のテーブルを分けます。
+
+`app_*` は MySQL のようなアプリDB由来のユーザー属性・プロフィール・状態snapshot、`warehouse_*` は Snowflake / TD のようなwarehouse由来の行動ログ、`eval_*` は feature rows / labels / evaluation targets の評価基盤側テーブルを表します。
+
+`event_time < as_of_time` と `snapshot_time <= as_of_time` の条件により、評価時点より未来の行動ログやユーザー状態を特徴量に混ぜないことを確認できます。
+
+`eval_feature_rows` には `label_value` を入れず、評価時に `eval_labels` と join して `fixtures/feature_rows_from_sqlite.csv` を書き出します。
 
 ### `AGENTS.md`
 
@@ -143,6 +168,17 @@ pip install -e ".[dev]"
 ```bash
 pytest -q
 ```
+
+SQLite warehouse から feature rows CSV を作る場合:
+
+```bash
+python3 scripts/build_sqlite_warehouse.py
+python3 scripts/export_sqlite_feature_rows.py
+```
+
+SQLite内には `eval_feature_rows` と `eval_labels` が作られます。
+
+生成される `fixtures/feature_rows_from_sqlite.csv` は、評価用に両者をjoinしたCSVで、既存の evaluation harness で評価できます。
 
 notebook を使う場合:
 

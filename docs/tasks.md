@@ -58,25 +58,26 @@
 
 ## Phase 3.5: Local SQLite Warehouse
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
-- [ ] SQLite raw table schema を作る
-- [ ] synthetic account attributes を seed する
-- [ ] synthetic user behavior logs を seed する
-- [ ] synthetic operator action logs を seed する
-- [ ] human label source 相当の SQL を作る
-- [ ] evaluation target 相当の SQL を作る
-- [ ] point-in-time feature row SQL を作る
-- [ ] SQLite から feature rows CSV を書き出す script を作る
-- [ ] 生成した feature rows を既存 evaluation harness で評価する
-- [ ] SQLite warehouse の学びを docs にまとめる
+- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] SQLite raw table schema を作る
+- [x] synthetic account attributes を seed する
+- [x] synthetic user behavior logs を seed する
+- [x] synthetic operator action logs を seed する
+- [x] human label source 相当の SQL を作る
+- [x] evaluation target 相当の SQL を作る
+- [x] point-in-time feature row SQL を作る
+- [x] SQLite から feature rows CSV を書き出す script を作る
+- [x] 生成した feature rows を既存 evaluation harness で評価する
+- [x] SQLite warehouse の学びを docs にまとめる
 
 ## Phase 4: Error Analysis
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
-- [ ] false positives を取り出す helper を作る
-- [ ] false negatives を取り出す helper を作る
-- [ ] score bucket ごとの観察方法を考える
-- [ ] scoring_fn 改善メモを残す
+- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] false positives を取り出す helper を作る
+- [x] false negatives を取り出す helper を作る
+- [x] score bucket ごとの観察方法を考える
+- [x] error analysis 用 notebook を作る
+- [x] scoring_fn 改善メモを残す
 
 ## Phase 5: ML Baseline
 

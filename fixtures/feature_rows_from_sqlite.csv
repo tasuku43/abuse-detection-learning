@@ -1,0 +1,5 @@
+user_id,as_of_time,label_value,account_age_minutes,contacts_24h,messages_1h,profile_updates_24h,device_count_24h,failed_login_count_24h,login_country_changes_24h,password_reset_24h,recipient_block_rate_24h,message_link_ratio_1h,plan,partition_date,target_source,signup_method,initial_country,account_status_as_of,email_verified,phone_verified,profile_completeness,bio_length,avatar_uploaded
+user_001,2026-05-02 09:30:00,1,1530,2,1,5,1,1,1,0,0.5,1.0,free,2026-05-02,human_label,email,US,active,0,0,20,12,0
+user_003,2026-05-02 00:30:00,1,60,3,2,4,0,0,0,0,0.0,1.0,free,2026-05-02,human_label,email,US,active,0,0,10,0,0
+user_005,2026-05-02 11:00:00,1,75,0,0,4,2,2,1,1,0.0,0.0,free,2026-05-02,human_label,email,DE,active,0,0,20,8,0
+user_006,2026-05-02 10:30:00,0,5289,0,2,2,0,0,0,0,0.5,0.5,paid,2026-05-02,human_label,email,JP,active,1,1,80,40,1

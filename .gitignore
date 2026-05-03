@@ -16,6 +16,7 @@ venv/
 # Local environment
 .env
 .env.*
+data/*.sqlite
 
 # OS / editor
 .DS_Store

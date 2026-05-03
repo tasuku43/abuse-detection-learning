@@ -4,6 +4,7 @@ from collections.abc import Callable, Sequence
 
 import pandas as pd
 
+from abuse_detection.error_analysis import false_negatives, false_positives
 from abuse_detection.metrics import threshold_sweep
 from abuse_detection.schema import ScoringFeatureRow, validate_feature_rows
 from abuse_detection.scoring import scoring_fn
@@ -44,12 +45,3 @@ def load_feature_rows(path: str) -> pd.DataFrame:
     validate_feature_rows(feature_rows)
     return feature_rows
 
-
-def false_positives(scored_rows: pd.DataFrame, threshold: float) -> pd.DataFrame:
-    """Return rows predicted as abuse while the label is negative."""
-    return scored_rows[(scored_rows["risk_score"] >= threshold) & (scored_rows["label_value"] == 0)]
-
-
-def false_negatives(scored_rows: pd.DataFrame, threshold: float) -> pd.DataFrame:
-    """Return rows predicted as non-abuse while the label is positive."""
-    return scored_rows[(scored_rows["risk_score"] < threshold) & (scored_rows["label_value"] == 1)]
