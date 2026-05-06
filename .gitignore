@@ -17,6 +17,7 @@ venv/
 .env
 .env.*
 data/*.sqlite
+data_lake/
 models/*/
 !models/.gitkeep
 

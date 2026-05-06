@@ -157,13 +157,13 @@
 
 ## Phase 10: Local Append-only Log Simulation
 
-- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
-- [ ] `src/abuse_detection/local_log_store.py` を作る
-- [ ] `scripts/build_action_candidates.py` を作る
-- [ ] `score_results` JSONL を `data_lake/` 配下に出力する
-- [ ] `action_candidates` JSONL を `data_lake/` 配下に出力する
-- [ ] `_SUCCESS` または `manifest.json` 相当の完了 marker を作る
-- [ ] local append-only log のテストを作る
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
+- [x] `src/abuse_detection/local_log_store.py` を作る
+- [x] `scripts/build_action_candidates.py` を作る
+- [x] `score_results` JSONL を `data_lake/` 配下に出力する
+- [x] `action_candidates` JSONL を `data_lake/` 配下に出力する
+- [x] `_SUCCESS` または `manifest.json` 相当の完了 marker を作る
+- [x] local append-only log のテストを作る
 
 ## Phase 11: Review Queue Simulation
 
