@@ -146,14 +146,14 @@
 
 ## Phase 9: ScoreResult and Decision Policy Simulation
 
-- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
-- [ ] `src/abuse_detection/production_schema.py` を作る
-- [ ] `ScoreResult` / `DecisionResult` / `ActionCandidate` を定義する
-- [ ] `src/abuse_detection/decision_policy.py` を作る
-- [ ] ScoreResult から ActionCandidate を作れるようにする
-- [ ] high score / low score / dry-run の decision policy をテストする
-- [ ] `tests/test_production_schema.py` を作る
-- [ ] `tests/test_decision_policy.py` を作る
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
+- [x] `src/abuse_detection/production_schema.py` を作る
+- [x] `ScoreResult` / `DecisionResult` / `ActionCandidate` を定義する
+- [x] `src/abuse_detection/decision_policy.py` を作る
+- [x] ScoreResult から ActionCandidate を作れるようにする
+- [x] high score / low score / dry-run の decision policy をテストする
+- [x] `tests/test_production_schema.py` を作る
+- [x] `tests/test_decision_policy.py` を作る
 
 ## Phase 10: Local Append-only Log Simulation
 
