@@ -124,3 +124,70 @@
 ## Production Gap Analysis
 
 - [x] 学習 repo と本番システムの差分を `docs/production_gap_analysis.md` にまとめる
+
+## Roadmap Repositioning
+
+- [x] `docs/design/` の2本を読み、評価基盤設計と本番スコアリング運用設計の関係を整理する
+- [x] `docs/design/` を public repo 前提の架空設計として、具体的な業務名詞を抽象表現へ寄せる
+- [x] `docs/design/` の Mermaid 図にデータストア形状、判断ノード、処理ノード、色分けを追加する
+- [x] `docs/design/` から学習プロセスや推奨実装タスクの節を外し、純粋な設計書として整理する
+- [x] `docs/roadmap.md` を `docs/design` 理解用のロードマップとして組み直す
+- [x] `README.md` の位置づけを、評価基盤単体から設計理解用プロジェクトへ更新する
+- [x] `AGENTS.md` の冒頭を Phase 8 以降の方針に合わせて更新する
+
+## Phase 8: Design Map and Concept Alignment
+
+- [ ] `docs/design_map.md` を作る
+- [ ] `docs/design/evaluation_harness_architecture_mermaid_ja.md` と既存実装の対応を表にする
+- [ ] `docs/design/production_scoring_architecture_mermaid_ja.md` と次に作る概念の対応を表にする
+- [ ] 評価基盤から本番スコアリング運用へ進む Mermaid 図を作る
+- [ ] `score_results` / `action_candidates` / `action_executions` を分ける理由を説明する
+
+## Phase 9: ScoreResult and Decision Policy Simulation
+
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] `src/abuse_detection/production_schema.py` を作る
+- [ ] `ScoreResult` / `DecisionResult` / `ActionCandidate` を定義する
+- [ ] `src/abuse_detection/decision_policy.py` を作る
+- [ ] ScoreResult から ActionCandidate を作れるようにする
+- [ ] high score / low score / dry-run の decision policy をテストする
+- [ ] `tests/test_production_schema.py` を作る
+- [ ] `tests/test_decision_policy.py` を作る
+
+## Phase 10: Local Append-only Log Simulation
+
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] `src/abuse_detection/local_log_store.py` を作る
+- [ ] `scripts/build_action_candidates.py` を作る
+- [ ] `score_results` JSONL を `data_lake/` 配下に出力する
+- [ ] `action_candidates` JSONL を `data_lake/` 配下に出力する
+- [ ] `_SUCCESS` または `manifest.json` 相当の完了 marker を作る
+- [ ] local append-only log のテストを作る
+
+## Phase 11: Review Queue Simulation
+
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] `scripts/review_queue_summary.py` を作る
+- [ ] open な action candidates を一覧できるようにする
+- [ ] risk_score 降順で並べられるようにする
+- [ ] `decision` / `candidate_status` で filter できるようにする
+- [ ] 外部管理画面 link を placeholder として表現する
+
+## Phase 12: Dry-run Action Worker Simulation
+
+- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] `src/abuse_detection/action_worker.py` を作る
+- [ ] `scripts/run_dry_run_worker.py` を作る
+- [ ] action_candidates を読み込めるようにする
+- [ ] `dry_run = true` の場合は execution log だけを出す
+- [ ] 既に処理済みの candidate を skip する
+- [ ] current status が open でない candidate を skip する
+- [ ] skip reason を `action_executions` に残す
+- [ ] dry-run worker のテストを作る
+
+## Phase 13: Feedback Loop Back to Evaluation
+
+- [ ] `docs/production_to_evaluation_feedback.md` を作る
+- [ ] synthetic review result fixture を作る
+- [ ] human review result から `label_events_human` 相当を作る toy flow を整理する
+- [ ] auto decision を teacher label に混ぜない流れを図解する

@@ -2,19 +2,29 @@
 
 ## このリポジトリの位置づけ
 
-このリポジトリは、SaaS におけるなりすまし・アカウント乗っ取り・スパム系アカウント検知のための、検知モデル育成パイプラインを学ぶための個人学習用プロジェクトです。
+このリポジトリは、SaaS におけるなりすまし・アカウント乗っ取り・スパム系アカウント検知の設計を、`docs/design/` のドキュメントに沿って理解するための個人学習用プロジェクトです。
 
 本番システムではありません。
 
-このリポジトリでは、実データ・顧客データ・社内DB・本番Snowflake・秘密情報には接続しません。最初は合成データ、fixture CSV、toy example のみを使います。
+このリポジトリでは、実データ・顧客データ・社内DB・本番Snowflake・秘密情報には接続しません。合成データ、fixture CSV、SQLite、toy example のみを使います。
 
 ## 学習目的
 
-このプロジェクトの主目的は、次の流れを手を動かしながら理解することです。
+このプロジェクトの主目的は、`docs/design/` にある2本の設計ドキュメントを、手元の小さな実装と対応づけて理解することです。
+
+1本目の `docs/design/evaluation_harness_architecture_mermaid_ja.md` では、次の評価基盤の流れを理解します。
 
 ```text
 feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -> error analysis
 ```
+
+2本目の `docs/design/production_scoring_architecture_mermaid_ja.md` では、評価済み scorer を本番寄りの運用へ接続する流れを理解します。
+
+```text
+scored rows -> ScoreResult -> Decision Policy -> ActionCandidate -> Review Queue / Dry-run Worker -> ActionExecution
+```
+
+既存の Phase 0〜7 は、1本目の評価基盤設計を理解するための作業として完了済みです。今後は Phase 8 以降として、ScoreResult、Decision Policy、ActionCandidate、Review Queue simulation、Dry-run Action Worker、評価基盤への feedback loop を小さく実装します。
 
 特に、次の責務分離を理解することを重視します。
 
@@ -52,6 +62,15 @@ feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -
    * この学習リポジトリでは、最初は実DB接続なしの skeleton でよい。
    * label events、evaluation targets、point-in-time feature rows の考え方をSQLファイルで表現する。
 
+6. Production scoring simulation
+
+   * scorer は直接停止しない。
+   * ScoreResult は scorer の出力履歴として扱う。
+   * Decision Policy は score から review_required / auto_suspend_candidate / no_action を決める。
+   * ActionCandidate は後続対応の候補であり、score そのものではない。
+   * Action Worker は必ず dry-run simulation にとどめ、実停止や外部API呼び出しは行わない。
+   * auto decision の結果を teacher label に混ぜない。
+
 ## 基本方針
 
 このプロジェクトでは、次の境界を守ります。
@@ -83,6 +102,17 @@ feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -
 
   * 特徴量生成SQLの概念的な skeleton を置く。
   * 将来 Snowflake に接続する場合の構造を表す。
+
+* `docs/design/`
+
+  * このプロジェクトの主教材となる設計ドキュメントを置く。
+  * roadmap はこの設計ドキュメントの理解順序として扱う。
+
+* production scoring simulation 用の Python module
+
+  * `ScoreResult`、`DecisionResult`、`ActionCandidate`、`ActionExecution` などを toy schema として定義する。
+  * Decision Policy、local append-only log、review queue summary、dry-run worker を小さく実装する。
+  * 実停止、実DB、実S3、実SQS、外部APIには接続しない。
 
 ## 作業の進め方
 

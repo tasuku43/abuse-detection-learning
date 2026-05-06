@@ -1,535 +1,495 @@
 # Roadmap
 
-このロードマップは、SaaS 不正検知の評価パイプラインを段階的に学ぶための作業順序を表します。
+このロードマップは、`docs/design/` にある2本の設計ドキュメントを理解するための学習順序を表します。
 
-このリポジトリは本番システムではありません。実データ、顧客データ、社内データ、credential、本番検知ロジックは使わず、合成データと toy example だけで進めます。
+このリポジトリは本番システムではありません。実データ、顧客データ、社内データ、credential、本番検知ロジック、実際の停止ルールや閾値は使いません。合成データ、toy example、ローカルファイル、SQLite だけで、設計の責務分離を小さく再現します。
 
-中心となる学習対象は次の流れです。
+## このプロジェクトの新しい位置づけ
 
-```text
-feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -> error analysis
+このプロジェクトの主目的は、SaaS 不正検知の本番アーキテクチャそのものを作ることではなく、`docs/design/` に書かれた設計を手元で理解することです。
+
+`docs/design/` は、次の2段構成になっています。
+
+1. `docs/design/evaluation_harness_architecture_mermaid_ja.md`
+   * scorer をどう評価し、改善できる状態にするかを扱う
+   * label、feature row、scoring_fn、risk_score、threshold sweep、error analysis、versioning、rolling window、calibration が中心
+
+2. `docs/design/production_scoring_architecture_mermaid_ja.md`
+   * 評価済み scorer を本番寄りの運用にどう接続するかを扱う
+   * ScoreResult、Decision Policy、ActionCandidate、Review Queue、Action Worker、S3 append-only log、dry-run / shadow mode が中心
+
+既存の Phase 0〜7 は、1本目の評価基盤設計を理解するための実装学習でした。今後は、2本目の本番スコアリング運用設計を理解するために、評価基盤で作った scorer / score を、本番寄りの decision / review / dry-run worker へ接続する流れを小さく再現します。
+
+```mermaid
+flowchart TD
+  D1[Design 1: Evaluation Harness] --> P0[Phase 0-7: Completed evaluation learning]
+  P0 --> D2[Design 2: Production Scoring]
+  D2 --> P8[Phase 8: Design Map]
+  P8 --> P9[Phase 9: ScoreResult and Decision Policy]
+  P9 --> P10[Phase 10: Local Append-only Logs]
+  P10 --> P11[Phase 11: Review Queue Simulation]
+  P10 --> P12[Phase 12: Dry-run Action Worker]
+  P11 --> P13[Phase 13: Feedback Loop Back to Evaluation]
+  P12 --> P13
 ```
 
-## Phase 0: Project Setup
+---
 
-目的: リポジトリの意図、作業方針、進捗管理の置き場所を明確にする。
+## Part 1: 完了済みの評価基盤学習
 
-このフェーズでは、実装そのものよりも、学習プロジェクトとして迷子にならないための土台を作る。
+Phase 0〜7 では、次の流れをローカルで動かせるようにしました。
 
-### 作るもの
+```text
+feature row
+  -> scoring_fn / ML scorer
+  -> risk_score
+  -> threshold sweep
+  -> precision / recall
+  -> false positive / false negative analysis
+  -> iteration
+```
+
+この部分は、`docs/design/evaluation_harness_architecture_mermaid_ja.md` の理解に対応します。
+
+### Phase 0: Project Setup
+
+目的: 学習プロジェクトとして迷子にならないための土台を作る。
+
+完了済みの主な成果:
 
 * `README.md`
 * `AGENTS.md`
 * `docs/roadmap.md`
 * `docs/tasks.md`
 * `docs/progress/`
-* `.gitignore`
+* `docs/pre_implementation_checklist.md`
 
-### 完了条件
-
-* `README.md` が人間向けの入口になっている
-* `AGENTS.md` に coding agent 向けの方針がある
-* `docs/roadmap.md` に学習フェーズが整理されている
-* `docs/tasks.md` で次の作業を追える
-* `docs/progress/` に日別の学習ログを残せる
-* public repo にしても問題ないよう、実データや機密情報を含めない方針が明記されている
-
-### 補足
-
-`README.md` はシンプルに保つ。
-
-細かい実装方針、テスト方針、責務分離、禁止事項は `AGENTS.md` に寄せる。
-
-`docs/progress/` には、学習ログだけを残す。会社名、実案件、実データ、実運用上の検知条件などは書かない。
-
----
-
-## Phase 1: Minimal Evaluation Harness
+### Phase 1: Minimal Evaluation Harness
 
 目的: 合成 feature rows から risk_score を出し、threshold sweep で precision / recall を確認できる最小構成を作る。
 
-このフェーズでは、Snowflake、dbt、notebook には深入りしない。
+完了済みの主な成果:
 
-まずはローカルの fixture CSV だけで、次の流れを動かす。
-
-```text
-fixture CSV
-  ↓
-feature schema validation
-  ↓
-scoring_fn
-  ↓
-risk_score
-  ↓
-threshold sweep
-  ↓
-precision / recall / TP / FP / FN
-```
-
-### 作るもの
-
-* `pyproject.toml`
-* `src/abuse_detection/__init__.py`
 * `src/abuse_detection/schema.py`
 * `src/abuse_detection/scoring.py`
 * `src/abuse_detection/metrics.py`
 * `src/abuse_detection/evaluation.py`
 * `fixtures/feature_rows_sample.csv`
-* `tests/test_schema.py`
-* `tests/test_scoring.py`
-* `tests/test_metrics.py`
-* `tests/test_evaluation.py`
+* evaluation harness のテスト
 
-### 完了条件
-
-* `pytest -q` が通る
-* `feature row` の必須カラムを検証できる
-* 必須 feature column が欠けている場合にエラーにできる
-* `scoring_fn` が 0 から 100 の `risk_score` を返す
-* 明らかに怪しい row が、明らかに正常な row より高い score になる
-* threshold ごとの precision / recall / TP / FP / FN が計算できる
-* false positive / false negative を取り出せる
-* scoring_fn が DB、ファイル、ネットワーク、label に依存していない
-
-### このフェーズでやらないこと
-
-* Snowflake 接続
-* dbt 実行
-* 実データ利用
-* notebook での本格分析
-* MLモデル学習
-
----
-
-## Phase 2: Notebook Workflow
+### Phase 2: Notebook Workflow
 
 目的: 評価の流れを notebook 上で手で回し、結果を観察できるようにする。
 
-このフェーズでは、notebook を「評価ワークフローを手で回す作業台」として使う。
-
-notebook は scoring logic の本体や、大量の特徴量生成SQLの置き場にしない。
-
-### 作るもの
+完了済みの主な成果:
 
 * `notebooks/01_evaluate_scoring.ipynb`
+* threshold sweep の表
+* threshold 80 の false positives / false negatives
+* scoring_fn / feature 改善候補の観察
 
-### notebook で行うこと
+### Phase 3: dbt Skeleton
 
-1. `fixtures/feature_rows_sample.csv` を読み込む
-2. feature row の中身を確認する
-3. `scoring_fn` を適用する
-4. `risk_score` 付き feature rows を表示する
-5. threshold を 0 から 100 まで 10 刻みで sweep する
-6. precision / recall / TP / FP / FN を表示する
-7. threshold 80 の false positives / false negatives を最低限確認する
-8. scoring_fn や feature 改善の候補をメモする
+目的: 将来の特徴量生成 SQL の置き場所と、point-in-time feature row の考え方を表現する。
 
-### 完了条件
+完了済みの主な成果:
 
-* fixture CSV を読み込める
-* score 付き feature rows を表示できる
-* threshold 0 から 100 まで 10 刻みで sweep できる
-* precision / recall / TP / FP / FN を表で確認できる
-* threshold 80 の false positives / false negatives を表示できる
-* notebook の markdown cell に、各ステップの意味が簡潔に説明されている
-* notebook に scoring logic の本体を持たせていない
+* staging model skeleton
+* `label_events_human`
+* `evaluation_targets`
+* `fct_abuse_feature_rows`
+* `event_time < as_of_time` による未来情報混入防止の表現
+* 自動検知システムの停止結果を teacher label に混ぜない方針
 
-### 補足
+### Phase 3.5: Local SQLite Warehouse
 
-Phase 2 では、false positives / false negatives は「見える」状態でよい。
+目的: Snowflake や Treasure Data の代わりに SQLite を小さな local warehouse として使い、raw table から feature rows を作る流れを再現する。
 
-本格的な error analysis は Phase 4 で行う。
+完了済みの主な成果:
 
----
+* synthetic raw tables
+* operator action logs からの human label source
+* evaluation targets
+* point-in-time feature rows
+* SQLite から feature rows CSV を書き出す script
 
-## Phase 3: dbt Skeleton
+### Phase 4: Error Analysis
 
-目的: 将来の特徴量生成SQLの置き場所と、point-in-time feature row の考え方を表現する。
+目的: metrics だけでなく、誤検知と見逃しの中身から改善仮説を立てる。
 
-このフェーズでは、dbt を実DBに接続しなくてよい。
+完了済みの主な成果:
 
-目的は、dbt を「特徴量生成SQLを管理する場所」として理解すること。
+* false positive / false negative helper
+* score bucket analysis
+* error analysis notebook
+* scoring_fn 改善メモ
 
-### 作るもの
-
-* `dbt/dbt_project.yml`
-* `dbt/models/staging/stg_account_attributes.sql`
-* `dbt/models/staging/stg_user_behavior_logs.sql`
-* `dbt/models/staging/stg_operator_action_logs.sql`
-* `dbt/models/labels/label_events_human.sql`
-* `dbt/models/features/evaluation_targets.sql`
-* `dbt/models/features/fct_abuse_feature_rows.sql`
-
-### 表現したい考え方
-
-* オペレーター操作ログのうち、人間の確認・停止操作だけを teacher label として扱う
-* 自動検知システムの停止結果を teacher label に混ぜない
-* 停止解除などの reversal を考慮できる余地を残す
-* `user_id + as_of_time` 粒度で evaluation target を作る
-* feature row は `as_of_time` 時点で見えていた情報だけから作る
-* `event_time < as_of_time` により未来情報の混入を防ぐ
-* event payload に含まれる属性 snapshot と、行動集計値を区別する
-
-### 完了条件
-
-* 人間の確認・停止操作だけを teacher label として扱う意図が SQL に表れている
-* `user_id + as_of_time` 粒度の evaluation target が表現されている
-* `event_time < as_of_time` により未来情報を混ぜない方針が表現されている
-* feature row を作る SQL skeleton がある
-* 実DB接続や credential を必要としない
-* dbt run の成功を完了条件にしていない
-
-### このフェーズでやらないこと
-
-* Snowflake 接続
-* 実テーブル名への接続
-* credential 管理
-* dbt Cloud / job 設定
-* 本番 feature table の作成
-
-## Phase 3.5: Local SQLite Warehouse
-
-目的: Snowflake や Treasure Data の代わりに SQLite を小さな local warehouse として使い、ユーザー行動ログ、アカウント属性、オペレーター操作ログから feature row を作る流れを手元で再現する。
-
-Phase 3 では、dbt skeleton により feature generation SQL の責務を表現した。
-
-Phase 3.5 では、その考え方を SQLite 上で実際に動かす。
-
-```text
-SQLite raw tables
-  - account attributes
-  - user behavior logs
-  - operator action logs
-  ↓
-feature generation SQL
-  ↓
-feature rows
-  ↓
-Python evaluation harness
-  ↓
-scoring_fn / metrics / error analysis
-```
-
-### 作るもの
-
-* `data/abuse_learning.sqlite`
-* `sql/create_raw_tables.sql`
-* `sql/seed_raw_events.sql`
-* `sql/build_feature_rows.sql`
-* `scripts/build_sqlite_fixture.py`
-* `fixtures/feature_rows_from_sqlite.csv`
-* SQLite 生成結果を検証するテスト
-
-### raw data の種類
-
-まずは3種類の raw data に絞る。
-
-* アカウント属性
-  * `user_id`
-  * `created_at`
-  * `plan`
-* ユーザー行動ログ
-  * `event_id`
-  * `user_id`
-  * `event_time`
-  * `event_name`
-  * `event_properties_json`
-* オペレーター操作ログ
-  * `event_id`
-  * `user_id`
-  * `event_time`
-  * `actor_type`
-  * `action_name`
-  * `reason_code`
-
-### 学ぶこと
-
-* オペレーター操作ログから label source を作ること
-* アカウント属性と label source から `user_id + as_of_time` の evaluation target を作ること
-* `event_time < as_of_time` で未来情報を防ぐこと
-* 自動検知システムの停止結果を teacher label に混ぜないこと
-* feature row が「ある時点で見えていた情報の再現」であること
-* SQLite を使っても、warehouse 上の feature generation と同じ責務分離を学べること
-
-### 完了条件
-
-* SQLite に synthetic raw tables を作れる
-* synthetic raw data を seed できる
-* SQL で `label_events_human` 相当を作れる
-* SQL で `evaluation_targets` 相当を作れる
-* SQL で point-in-time feature rows を作れる
-* 生成した feature rows を既存の evaluation harness で評価できる
-* 実DB、credential、実データを使っていない
-
-### このフェーズでやらないこと
-
-* Snowflake / TD への接続
-* dbt run の本格導入
-* 本番 schema の再現
-* 実データ seed
-* 大量データ処理
-* orchestration
-
----
-
-## Phase 4: Error Analysis
-
-目的: score の良し悪しを precision / recall だけでなく、誤検知例から観察する。
-
-このフェーズでは、単に metrics を見るだけでなく、どのような行が false positive / false negative になっているかを確認する。
-
-Phase 2 では FP/FN を最低限表示できればよかった。
-
-Phase 4 では、FP/FN を分析しやすくする。
-
-### 作るもの
-
-* false positive / false negative の表示補助
-* score bucket ごとの集計
-* feature 値を並べた比較表
-* 改善候補メモ欄
-* notebook 上の error analysis section
-
-### 観察したいこと
-
-* 高スコアなのに負例だった行は何か
-* 低スコアなのに正例だった行は何か
-* 特定の feature が誤検知に寄与していないか
-* paid plan や account age などで誤検知が偏っていないか
-* threshold を上げ下げしたときに、どの行が判定境界をまたぐか
-
-### 完了条件
-
-* false positive 行を feature と一緒に確認できる
-* false negative 行を feature と一緒に確認できる
-* score bucket ごとに label 分布を確認できる
-* scoring_fn の改善候補を具体的に書ける
-* 次に追加すべき feature の仮説を立てられる
-
-### このフェーズでやらないこと
-
-* 本番適用判断
-* 実ユーザー調査
-* 実データに基づく運用判断
-* 高度な可視化基盤構築
-
----
-
-## Phase 5: ML Baseline
+### Phase 5: ML Baseline
 
 目的: rule-based scoring_fn と、最小の ML-based scoring_fn を同じ evaluation harness で比較する。
 
-このフェーズでは、高度な ML モデルには進まない。
+完了済みの主な成果:
 
-まず logistic regression だけを使い、ML も次の同じ流れに乗ることを確認する。
+* logistic regression baseline
+* ML model の `risk_score` 化
+* rule-based scorer と ML scorer の比較
+* saved model artifact / metadata
+
+### Phase 6: Iteration Ideas
+
+目的: scorer、feature、評価方法を小さく改善しながら、検知モデル育成パイプラインの理解を深める。
+
+完了済みの主な成果:
+
+* score_source / score_version
+* negative sampling
+* rolling window evaluation
+* score calibration
+
+### Phase 7: Practical Evaluation Improvements
+
+目的: 評価を時間方向に広げ、future validation や window ごとの劣化を観察する。
+
+完了済みの主な成果:
+
+* timeseries fixture
+* time-based train / validation split
+* window ごとの precision drop 観察
+* `docs/learning_review.md`
+* `docs/production_gap_analysis.md`
+
+---
+
+## Part 2: `docs/design` 理解のための新しいロードマップ
+
+ここから先は、`docs/design/production_scoring_architecture_mermaid_ja.md` を読むための学習に移ります。
+
+中心となる流れは次です。
 
 ```text
-feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -> error analysis
+scored rows
+  -> ScoreResult
+  -> Decision Policy
+  -> ActionCandidate
+  -> Review Queue simulation
+  -> Dry-run Action Worker
+  -> ActionExecution
+  -> human review / business events
+  -> label_events_human
+  -> evaluation harness
 ```
 
-rule-based scoring_fn では、人間が条件と重みを書く。
+重要なのは、scorer が直接停止しないことです。scorer は `risk_score` を返すだけです。停止候補にするか、レビューに回すか、何もしないかは Decision Policy が決めます。実際の処理は Review Queue や Action Worker の責務です。
 
-ML-based scoring_fn では、学習済みモデルが feature row から `risk_score` を返す。
+---
 
-ただし、feature row の作り方、label leakage の防止、negative sample の設計、評価方法は人間が確認する。
+## Phase 8: Design Map and Concept Alignment
+
+目的: 既存実装と `docs/design/` の概念を対応づける。
+
+評価基盤側の `feature row -> scorer -> risk_score -> metrics` と、本番スコアリング側の `ScoreResult -> Decision Policy -> ActionCandidate -> ActionExecution` をつなげて理解します。
 
 ### 作るもの
 
-* `src/abuse_detection/ml_baseline.py`
-* `tests/test_ml_baseline.py`
-* `notebooks/02_compare_rule_vs_ml.ipynb`
+* `docs/design_map.md`
+* 既存ファイルと設計概念の対応表
+* 評価基盤から本番スコアリング運用へ進む Mermaid 図
 
 ### 学ぶこと
 
-* ML model も `feature row -> risk_score` の関数として扱えること
-* 同じ feature row を使って rule-based scoring_fn と logistic regression を比較できること
-* ML に進んでも threshold sweep と error analysis が必要なこと
-* train / validation を分けずに評価すると、性能を楽観的に見やすいこと
-* small fixture では model の性能そのものより、評価の形を学ぶことが重要なこと
-
-### 最初に使うモデル
-
-logistic regression に絞る。
-
-理由:
-
-* feature と score の関係を説明しやすい
-* 小さな合成データでも動かしやすい
-* rule-based scoring_fn との違いを観察しやすい
-* decision tree や random forest より、最初の比較対象として単純
+* 評価基盤と本番スコアリングは別責務だが、閉じた別世界ではないこと
+* `risk_score` は action ではなく、decision の入力であること
+* `score_results`、`action_candidates`、`action_executions` を分ける理由
+* auto decision を teacher label に混ぜない理由
 
 ### 完了条件
 
-* logistic regression を fixture feature rows から学習できる
-* ML model の出力を 0 から 100 の `risk_score` に変換できる
-* rule-based scoring_fn と ML-based scoring_fn を同じ threshold sweep で比較できる
-* false positives / false negatives を両方の scoring_fn で比較できる
-* ML を使っても evaluation harness を再利用できることを説明できる
+* `docs/design/` の2本がどうつながるか説明できる
+* 既存の `evaluate_feature_rows` の出力が、どのように ScoreResult の入力になるか説明できる
+* 次に実装する schema / dataclass の責務が明確になっている
 
 ### このフェーズでやらないこと
 
-* advanced ML model の導入
-* hyperparameter tuning
-* production model registry
-* online inference
-* 実データでの学習
-* 本番適用判断
+* 本番 API 実装
+* 実停止処理
+* S3 / SQS / DB への接続
+* Streamlit などの UI 実装
 
 ---
 
-## Phase 6: Iteration
+## Phase 9: ScoreResult and Decision Policy Simulation
 
-目的: scoring_fn、feature、評価方法を小さく改善しながら、検知モデル育成パイプラインの理解を深める。
+目的: 評価済み score を、本番寄りの decision に変換する最小構造を作る。
 
-このフェーズでは、rule-based scoring_fn と ML-based scoring_fn の両方を比較対象にしながら、小さな改善を繰り返す。
-
-重要なのは、大きなMLモデルをいきなり導入することではなく、次のループを回すこと。
-
-```text
-評価する
-  ↓
-誤検知を見る
-  ↓
-仮説を立てる
-  ↓
-feature / scoring_fn を少し変える
-  ↓
-再評価する
-```
-
-### 優先順つき候補
-
-1. scoring_fn の versioning
-2. negative sampling の設計
-3. rolling window evaluation
-4. score calibration
-
-### 6.1 scoring_fn の versioning
-
-目的: どの scoring_fn で評価した結果なのかを追えるようにする。
-
-候補:
-
-* `SCORING_VERSION` を定義する
-* evaluation result に scoring version を含める
-* notebook に使用した scoring version を表示する
-
-完了条件:
-
-* 評価結果が、どの scoring_fn から出たものか分かる
-
-### 6.2 negative sampling の設計
-
-目的: 負例をどう作るかを理解する。
-
-学ぶこと:
-
-* 「停止されていない = 正常」とは単純に言えない理由
-* 登録から一定日数経過したユーザーを負例候補にする理由
-* 停止履歴やレビュー履歴をどう扱うか
-* negative sample の偏り
-
-完了条件:
-
-* simple negative sampling の方針を説明できる
-* negative sample の限界を説明できる
-
-### 6.3 rolling window evaluation
-
-目的: 時間による攻撃パターンの変化を評価に取り入れる。
-
-学ぶこと:
-
-* 評価期間を固定しすぎると見えない問題
-* 攻撃者ドリフト
-* 週次 / 月次で performance を比較する意味
-
-完了条件:
-
-* 複数 window で precision / recall を比較できる
-* window によって性能が変わる可能性を説明できる
-
-### 6.4 score calibration
-
-目的: score を単なる順位付けではなく、確率らしい値として扱う場合の考え方を学ぶ。
-
-このテーマは少し後回しでよい。
-
-完了条件:
-
-* score calibration が何を解決する話かを説明できる
-* threshold sweep との違いを説明できる
-
----
-
-## Optional Phase: CLI Runner
-
-目的: notebook なしでも、ローカルで評価を実行できるようにする。
-
-このフェーズは必須ではない。
-
-Phase 1 または Phase 2 の後に追加してもよい。
+このフェーズでは、既存の scored rows を `ScoreResult` として扱い、Decision Policy に通して `review_required`、`auto_suspend_candidate`、`no_action` のような decision を返します。
 
 ### 作るもの
 
-* `scripts/run_eval.py`
+* `src/abuse_detection/production_schema.py`
+* `src/abuse_detection/decision_policy.py`
+* `tests/test_production_schema.py`
+* `tests/test_decision_policy.py`
 
-または
+### 最小データ構造
 
-* `python -m abuse_detection.evaluation`
+* `ScoreResult`
+  * `score_result_id`
+  * `user_id`
+  * `as_of_time`
+  * `risk_score`
+  * `score_source`
+  * `score_version`
+  * `feature_version`
+  * `scored_at`
+
+* `DecisionResult`
+  * `decision`
+  * `decision_reason`
+  * `decision_policy_version`
+  * `dry_run`
+
+* `ActionCandidate`
+  * `action_candidate_id`
+  * `score_result_id`
+  * `user_id`
+  * `risk_score`
+  * `decision`
+  * `candidate_status`
+  * `dry_run`
+  * `created_at`
+
+### 学ぶこと
+
+* `risk_score >= threshold` は停止ではなく、候補化条件であること
+* scorer と Decision Policy を分ける理由
+* threshold や dry-run flag を scorer の外に置く理由
+* review_required と auto_suspend_candidate の違い
 
 ### 完了条件
 
-* fixture CSV を読み込んで評価結果を標準出力できる
-* threshold sweep の結果を terminal で確認できる
-* notebook なしでも最小評価が動く
+* ScoreResult から ActionCandidate を作れる
+* high score は `review_required` または `auto_suspend_candidate` になる
+* low score は `no_action` になる
+* dry-run が default で安全側に倒れている
+* scorer の実装を変更せず decision policy だけを変更できる
+
+### このフェーズでやらないこと
+
+* 本当に停止する処理
+* 外部管理画面連携
+* queue / worker
+* DB 永続化
+
+---
+
+## Phase 10: Local Append-only Log Simulation
+
+目的: S3 append-only log の考え方を、ローカルファイルで小さく再現する。
+
+本番設計では、`score_results/`、`action_candidates/`、`action_executions/` を append-only の履歴ログとして保存します。このフェーズでは、実 S3 ではなく `data_lake/` 配下の JSONL で同じ考え方を学びます。
+
+### 作るもの
+
+* `src/abuse_detection/local_log_store.py`
+* `scripts/build_action_candidates.py`
+* `data_lake/score_results/`
+* `data_lake/action_candidates/`
+* log 出力のテスト
+
+### ローカル path 例
+
+```text
+data_lake/score_results/dt=2026-05-06/hour=10/run_id=run_local/part-000.jsonl
+data_lake/action_candidates/dt=2026-05-06/hour=10/run_id=run_local/part-000.jsonl
+```
+
+### 学ぶこと
+
+* score は上書きする現在値ではなく、時点ごとの履歴であること
+* action candidate は score そのものではなく、decision policy の出力であること
+* append-only log は監査、再処理、分析に向いていること
+* 書き込み完了 marker が必要になる理由
+
+### 完了条件
+
+* scored rows から score_results JSONL を出力できる
+* score_results から action_candidates JSONL を出力できる
+* `_SUCCESS` または `manifest.json` 相当の完了 marker を作れる
+* 出力内容に `score_source` / `score_version` / `decision_policy_version` が含まれる
+
+### このフェーズでやらないこと
+
+* 実 S3 接続
+* Parquet 最適化
+* SQS 通知
+* 大量データ処理
+
+---
+
+## Phase 11: Review Queue Simulation
+
+目的: ActionCandidate を人間レビューの入口として見る。
+
+Review Queue は、単に user_id を検索して score を見る画面ではありません。主入力は Decision Policy を通過した `action_candidates` です。このフェーズでは、最初は CLI または notebook で候補一覧を表示するだけにします。
+
+### 作るもの
+
+* `scripts/review_queue_summary.py`
+* `notebooks/03_review_queue_simulation.ipynb` または CLI summary
+* action candidate の filter / sort helper
+
+### 学ぶこと
+
+* Review Queue の主入力が `action_candidates` であること
+* risk_score 順、decision 順、candidate_status 順に見る意味
+* review_required と auto_suspend_candidate を同じ画面で扱う場合の違い
+* UI の mutable state と append-only log は責務が違うこと
+
+### 完了条件
+
+* open な action candidates を一覧できる
+* risk_score 降順で並べられる
+* `decision` / `candidate_status` で filter できる
+* 外部管理画面 link は placeholder として表現できる
+* 実停止処理につながっていない
+
+### このフェーズでやらないこと
+
+* 本格 UI
+* 認可
+* 実管理画面連携
+* reviewer assignment
+* DB を使った mutable review state
+
+---
+
+## Phase 12: Dry-run Action Worker Simulation
+
+目的: ActionCandidate を worker が読む場合の安全弁を理解する。
+
+Action Worker は、candidate を読んで即処理するだけでは不十分です。処理済み確認、現在状態確認、safety guard、dry-run、skip reason logging が必要になります。このフェーズでは実停止を行わず、dry-run の `ActionExecution` ログだけを出します。
+
+### 作るもの
+
+* `src/abuse_detection/action_worker.py`
+* `scripts/run_dry_run_worker.py`
+* `data_lake/action_executions/`
+* dry-run worker のテスト
+
+### 学ぶこと
+
+* scoring job 時点と worker 実行時点で account status が変わり得ること
+* Time Of Check / Time Of Use の問題
+* already processed check と idempotency が必要な理由
+* dry-run は本番化前の安全な学習段階であること
+
+### 完了条件
+
+* action_candidates を読み込める
+* `dry_run = true` の場合は実処理せず execution log だけ出せる
+* 既に処理済みの candidate を skip できる
+* current status が open でない candidate を skip できる
+* skip reason を `action_executions` に残せる
+
+### このフェーズでやらないこと
+
+* 実停止
+* 外部 API 呼び出し
+* retry / DLQ の本格実装
+* SQS worker
+
+---
+
+## Phase 13: Feedback Loop Back to Evaluation
+
+目的: 本番寄りの scoring / decision / review 結果を、評価基盤へ戻す考え方を理解する。
+
+本番設計では、score_results、action_candidates、action_executions、人間レビュー結果、停止・再開などの business events が、将来的に label source や evaluation target に戻ります。ただし、自動判定結果を teacher label に混ぜてはいけません。
+
+### 作るもの
+
+* `docs/production_to_evaluation_feedback.md`
+* synthetic review result fixture
+* human review result から `label_events_human` 相当を作る toy flow
+
+### 学ぶこと
+
+* score_results は評価・分析に使えるが teacher label ではないこと
+* action_candidates も teacher label ではないこと
+* human review / human action を label source として扱う理由
+* reversal handling を設計に残す理由
+
+### 完了条件
+
+* score / candidate / execution / human label の違いを説明できる
+* auto decision を teacher label に混ぜない流れを図解できる
+* human review result から評価基盤へ戻る toy flow を説明できる
+
+### このフェーズでやらないこと
+
+* 本番 review log の取り込み
+* 実データの label 作成
+* 自動停止結果を正例として学習すること
+
+---
+
+## Optional Phase: Scoring API Shape
+
+目的: 本番設計に出てくる Scoring API の外形だけを理解する。
+
+このフェーズは必須ではありません。先に batch / local file simulation で ScoreResult と ActionCandidate の責務を理解してからで十分です。
+
+### 作るもの
+
+* `docs/scoring_api_shape.md`
+* `user_id + as_of_time -> ScoreResult` の疑似インターフェース
+* feature row を直接受け取る debug entrypoint の整理
+
+### 学ぶこと
+
+* 本番アプリケーションが feature row の作り方を知らなくてよい理由
+* Scoring API が持つ責務と持たない責務
+* batch scoring / review app / evaluation debug で入口が違うこと
 
 ---
 
 ## 進め方の原則
 
-### 1. 小さく動くものを優先する
+### 1. `docs/design` から逆算する
 
-最初から Snowflake、dbt、notebook、ML model を全部つなげない。
+新しい機能を足す前に、どの design doc のどの概念を理解するための実装かを明確にします。
 
-まずは fixture CSV で評価基盤の芯を動かす。
+### 2. scorer は action しない
 
-### 2. 実データを使わない
+`scoring_fn` や ML scorer は `risk_score` を返すだけに保ちます。レビュー候補化や停止候補化は Decision Policy の責務です。
 
-このリポジトリでは、学習用の合成データのみを使う。
+### 3. 実停止につながる処理を作らない
 
-実データ、社内データ、顧客データ、credential は入れない。
+このリポジトリでは、実停止、実ユーザー操作、実管理画面連携、外部 API 呼び出しは行いません。worker simulation は必ず dry-run にします。
 
-### 3. 責務を混ぜない
+### 4. append-only log と現在状態を混ぜない
 
-* feature generation は feature row を作る
-* scoring_fn は feature row から risk_score を返す
-* evaluation harness は score と label を比較する
-* notebook は評価ワークフローを手で回す
-* dbt は特徴量生成SQLの置き場所を表す
+`score_results`、`action_candidates`、`action_executions` は履歴ログとして扱います。Review Queue の担当者、メモ、処理中 lock のような mutable state は別責務として考えます。
 
-### 4. notebook を肥大化させない
+### 5. auto decision を teacher label にしない
 
-notebook は実験と観察の場所。
+自動判定や action candidate は、評価や監査には使えます。しかし teacher label の正例は、原則として human review / human action から作ります。
 
-scoring logic の本体や、大量の特徴量生成SQLは置かない。
+### 6. public repo 前提で安全にする
 
-### 5. public repo 前提で安全にする
-
-public repo にできるよう、実運用上の検知ルールや閾値、社内固有の情報は入れない。
+会社名、実案件、実データ、実運用上の検知条件、credential、secret は書きません。設計理解に必要な情報は、抽象化した toy example で表現します。
 
 ---
 
 ## 現時点の優先順位
 
-まずは次の順番で進める。
+次は、次の順番で進めます。
 
-1. Phase 0 を完了する
-2. Phase 1 の最小 evaluation harness を作る
-3. pytest を通す
-4. Phase 2 の notebook で評価を眺める
-5. Phase 3 の dbt skeleton で feature generation の置き場所を理解する
-6. Phase 3.5 の SQLite warehouse で raw data から feature row を作る流れを動かす
-7. Phase 4 で error analysis を深める
-8. Phase 5 で logistic regression の ML baseline と比較する
-9. Phase 6 で小さく改善を繰り返す
+1. Phase 8 で `docs/design` と既存実装の対応表を作る
+2. Phase 9 で ScoreResult / Decision Policy / ActionCandidate を最小実装する
+3. Phase 10 で local append-only log を作る
+4. Phase 11 で review queue を CLI または notebook で眺める
+5. Phase 12 で dry-run action worker を作る
+6. Phase 13 で human review 結果を評価基盤へ戻す流れを整理する
+
+この順番にする理由は、`docs/design/production_scoring_architecture_mermaid_ja.md` の本文が、Scoring API / ScoreResult / Decision Policy / ActionCandidate / Review Queue / Action Worker / feedback loop という依存関係で続いているためです。

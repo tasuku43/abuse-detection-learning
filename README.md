@@ -1,16 +1,24 @@
-# SaaS不正検知・評価基盤 学習用リポジトリ
+# SaaS不正検知アーキテクチャ理解用リポジトリ
 
 ## このリポジトリについて
 
 このリポジトリは本番システムではありません。
 
-目的は、実データや本番環境を使わずに、次の基本構造を手を動かしながら理解することです。
+目的は、実データや本番環境を使わずに、`docs/design/` にある SaaS 不正検知の設計ドキュメントを手を動かしながら理解することです。
+
+最初の学習対象は、評価基盤の基本構造でした。
 
 ```text
 feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -> error analysis
 ```
 
-最初は、合成データと toy example だけを使って進めます。
+今後の学習対象は、評価済み scorer を本番寄りの運用に接続する流れです。
+
+```text
+scored rows -> ScoreResult -> Decision Policy -> ActionCandidate -> Review Queue / Dry-run Worker -> ActionExecution
+```
+
+合成データと toy example だけを使い、実停止や外部 API 呼び出しは行いません。
 
 ## 学びたいこと
 
@@ -24,6 +32,11 @@ feature row -> scoring_fn -> risk_score -> threshold sweep -> precision/recall -
 * notebook は何のために使うのか
 * dbt は特徴量生成のどこに関わるのか
 * 評価基盤をどう育てていくのか
+* ScoreResult とは何か
+* Decision Policy は scorer と何が違うのか
+* ActionCandidate / ActionExecution をなぜ score と分けるのか
+* Review Queue や dry-run worker はどの責務を持つのか
+* 本番で生成された結果を、どう評価基盤へ戻すのか
 
 ## 中心となる考え方
 
@@ -40,7 +53,23 @@ Evaluation Harness
   risk_score と label を比較して性能を見る
 ```
 
-最初から高度な機械学習モデルを作るのではなく、まずはシンプルなルールベースの scoring function から始めます。
+評価基盤の次の段階では、さらに次を分けて考えます。
+
+```text
+ScoreResult
+  scorer が出した時点ごとの score 履歴
+
+Decision Policy
+  score を review_required / auto_suspend_candidate / no_action へ変換するルール
+
+ActionCandidate
+  後続対応の候補になったという履歴
+
+ActionExecution
+  worker または operator が candidate に対して行った結果
+```
+
+最初から高度な機械学習モデルや本番アプリケーションを作るのではなく、まずは設計上の責務分離をローカルで小さく再現します。
 
 ## 想定ディレクトリ構成
 
@@ -95,6 +124,11 @@ abuse-detection-learning/
       evaluation_targets.sql
       feature_rows.sql
       labeled_feature_rows.sql
+
+  docs/
+    design/
+      evaluation_harness_architecture_mermaid_ja.md
+      production_scoring_architecture_mermaid_ja.md
 ```
 
 ## 各要素の役割
@@ -139,7 +173,7 @@ Codex などの coding agent 向けの作業指示書です。
 
 ## 最初のゴール
 
-最初のゴールは、本番接続ではなく、ローカルでこの流れが動くことです。
+最初のゴールは完了済みで、本番接続ではなく、ローカルでこの流れが動くことでした。
 
 ```text
 fixture CSV
@@ -153,6 +187,22 @@ threshold sweep
 precision / recall
   ↓
 false positive / false negative の確認
+```
+
+次のゴールは、`docs/design/production_scoring_architecture_mermaid_ja.md` を理解するために、次の流れをローカルで再現することです。
+
+```text
+score_results
+  ↓
+decision_policy
+  ↓
+action_candidates
+  ↓
+review queue simulation
+  ↓
+dry-run action worker
+  ↓
+action_executions
 ```
 
 ## 実行方法
@@ -212,18 +262,17 @@ Codex に依頼するときは、まず `AGENTS.md` を読ませます。
 
 ```text
 AGENTS.md を読んで、この学習リポジトリの方針に従ってください。
-まずはローカルで動く最小の evaluation harness を作ってください。
+docs/design を理解するために、まず Phase 8 の design map を作ってください。
 実データ・実DB接続・secret は使わないでください。
 ```
 
 ## 今後やりたいこと
 
-* feature schema の明示
-* scoring_fn のバージョン管理
-* false positive / false negative の分析補助
-* dbt skeleton の具体化
-* Snowflake 接続の検討
-* label_events_human の設計
-* negative sampling の設計
-* rolling window evaluation
-* scoring_fn のMLモデル化
+次は `docs/roadmap.md` の Phase 8 以降に沿って進めます。
+
+1. `docs/design` と既存実装の対応表を作る
+2. ScoreResult / Decision Policy / ActionCandidate を最小実装する
+3. ローカルの append-only log を作る
+4. Review Queue simulation で候補を眺める
+5. Dry-run Action Worker で安全弁を確認する
+6. Human review 結果を評価基盤へ戻す流れを整理する
