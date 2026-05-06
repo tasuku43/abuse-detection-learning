@@ -6,7 +6,8 @@ from typing import Literal
 from uuid import uuid4
 
 
-Decision = Literal["no_action", "review_required", "auto_action_candidate"]
+Decision = Literal["no_action", "action_candidate"]
+CandidatePriority = Literal["standard", "high"]
 CandidateStatus = Literal["open", "skipped", "processed"]
 
 
@@ -35,7 +36,7 @@ class DecisionResult:
     decision: Decision
     decision_reason: str
     decision_policy_version: str
-    dry_run: bool
+    candidate_priority: CandidatePriority | None = None
 
 
 @dataclass(frozen=True)
@@ -50,11 +51,11 @@ class ActionCandidate:
     decision: Decision
     decision_reason: str
     decision_policy_version: str
+    candidate_priority: CandidatePriority
     score_source: str
     score_version: str
     feature_version: str
     candidate_status: CandidateStatus
-    dry_run: bool
     created_at: datetime
 
 
@@ -74,6 +75,10 @@ def build_action_candidate(
     created_at: datetime | None = None,
 ) -> ActionCandidate:
     """Create an ActionCandidate from score and policy outputs."""
+    if decision_result.decision != "action_candidate":
+        raise ValueError("ActionCandidate can only be built from action_candidate decisions")
+    if decision_result.candidate_priority is None:
+        raise ValueError("action_candidate decisions must include candidate_priority")
     return ActionCandidate(
         action_candidate_id=new_id("action_candidate"),
         score_result_id=score_result.score_result_id,
@@ -83,10 +88,10 @@ def build_action_candidate(
         decision=decision_result.decision,
         decision_reason=decision_result.decision_reason,
         decision_policy_version=decision_result.decision_policy_version,
+        candidate_priority=decision_result.candidate_priority,
         score_source=score_result.score_source,
         score_version=score_result.score_version,
         feature_version=score_result.feature_version,
         candidate_status="open",
-        dry_run=decision_result.dry_run,
         created_at=created_at or utc_now(),
     )

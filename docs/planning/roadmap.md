@@ -221,7 +221,7 @@ scored rows
 
 目的: 評価済み score を、本番寄りの decision に変換する最小構造を作る。
 
-このフェーズでは、既存の scored rows を `ScoreResult` として扱い、Decision Policy に通して `review_required`、`auto_suspend_candidate`、`no_action` のような decision を返します。
+このフェーズでは、既存の scored rows を `ScoreResult` として扱い、Decision Policy に通して `action_candidate` または `no_action` の decision を返します。候補の強さは `candidate_priority` で表し、手動で扱うか自動 worker が読むかという How は後段へ分けます。
 
 ### 作るもの
 
@@ -246,7 +246,7 @@ scored rows
   * `decision`
   * `decision_reason`
   * `decision_policy_version`
-  * `dry_run`
+  * `candidate_priority`
 
 * `ActionCandidate`
   * `action_candidate_id`
@@ -254,23 +254,22 @@ scored rows
   * `user_id`
   * `risk_score`
   * `decision`
+  * `candidate_priority`
   * `candidate_status`
-  * `dry_run`
   * `created_at`
 
 ### 学ぶこと
 
 * `risk_score >= threshold` は停止ではなく、候補化条件であること
 * scorer と Decision Policy を分ける理由
-* threshold や dry-run flag を scorer の外に置く理由
-* review_required と auto_suspend_candidate の違い
+* threshold を scorer の外に置く理由
+* 候補化の判断と、手動・自動・dry-run などの処理方法を分ける理由
 
 ### 完了条件
 
 * ScoreResult から ActionCandidate を作れる
-* high score は `review_required` または `auto_suspend_candidate` になる
+* high score は `action_candidate` になり、優先度が付く
 * low score は `no_action` になる
-* dry-run が default で安全側に倒れている
 * scorer の実装を変更せず decision policy だけを変更できる
 
 ### このフェーズでやらないこと
@@ -341,8 +340,8 @@ Review Queue は、単に user_id を検索して score を見る画面ではあ
 ### 学ぶこと
 
 * Review Queue の主入力が `action_candidates` であること
-* risk_score 順、decision 順、candidate_status 順に見る意味
-* review_required と auto_suspend_candidate を同じ画面で扱う場合の違い
+* risk_score 順、candidate_priority 順、candidate_status 順に見る意味
+* 候補一覧と、その後の手動対応・自動 worker 処理の責務が違うこと
 * UI の mutable state と append-only log は責務が違うこと
 
 ### 完了条件

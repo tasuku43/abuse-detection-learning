@@ -38,10 +38,10 @@ def test_score_result_rejects_score_outside_zero_to_one_hundred() -> None:
 def test_build_action_candidate_copies_score_and_decision_context() -> None:
     score_result = _score_result(risk_score=91.0)
     decision_result = DecisionResult(
-        decision="review_required",
-        decision_reason="risk_score >= review_threshold",
+        decision="action_candidate",
+        decision_reason="risk_score >= candidate_threshold",
         decision_policy_version="decision_policy_v001",
-        dry_run=True,
+        candidate_priority="standard",
     )
     created_at = datetime(2026, 5, 6, 10, 5, tzinfo=timezone.utc)
 
@@ -55,7 +55,19 @@ def test_build_action_candidate_copies_score_and_decision_context() -> None:
     assert candidate.score_result_id == score_result.score_result_id
     assert candidate.user_id == score_result.user_id
     assert candidate.risk_score == 91.0
-    assert candidate.decision == "review_required"
+    assert candidate.decision == "action_candidate"
+    assert candidate.candidate_priority == "standard"
     assert candidate.candidate_status == "open"
-    assert candidate.dry_run is True
     assert candidate.created_at == created_at
+
+
+def test_build_action_candidate_rejects_no_action_decision() -> None:
+    score_result = _score_result(risk_score=42.0)
+    decision_result = DecisionResult(
+        decision="no_action",
+        decision_reason="risk_score < candidate_threshold",
+        decision_policy_version="decision_policy_v001",
+    )
+
+    with pytest.raises(ValueError, match="ActionCandidate can only be built"):
+        build_action_candidate(score_result, decision_result)

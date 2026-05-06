@@ -56,7 +56,7 @@ ScoreResult -> Decision Policy -> ActionCandidate -> Review Queue / Dry-run Work
 | --- | --- | --- |
 | ScoreResult | `src/abuse_detection/production_schema.py` の `ScoreResult` | scorer の出力履歴。action ではなく、判断材料である |
 | Decision Policy | `src/abuse_detection/decision_policy.py` | `risk_score` と policy 設定から decision を決める |
-| DecisionResult | `production_schema.py` の `DecisionResult` | `review_required`、`auto_action_candidate`、`no_action` などの判断結果 |
+| DecisionResult | `production_schema.py` の `DecisionResult` | `action_candidate`、`no_action` などの判断結果 |
 | ActionCandidate | `production_schema.py` の `ActionCandidate` | Decision Policy により生まれた後続対応候補 |
 | Review Queue View | Phase 11 の `scripts/review_queue_summary.py` | open な action candidates を reviewer が見るための一覧 |
 | Dry-run Action Worker | Phase 12 の `src/abuse_detection/action_worker.py` | action candidates を読み、dry-run execution log を残す |
@@ -137,15 +137,15 @@ flowchart LR
 Phase 9 では、次の最小単位から始める。
 
 * `ScoreResult`: `user_id`、`as_of_time`、`risk_score`、`score_source`、`score_version`、`feature_version`、`scored_at`
-* `DecisionResult`: `decision`、`decision_reason`、`decision_policy_version`、`dry_run`
-* `ActionCandidate`: `score_result_id`、`user_id`、`risk_score`、`decision`、`candidate_status`、`dry_run`、`created_at`
+* `DecisionResult`: `decision`、`decision_reason`、`decision_policy_version`、`candidate_priority`
+* `ActionCandidate`: `score_result_id`、`user_id`、`risk_score`、`decision`、`candidate_priority`、`candidate_status`、`created_at`
 
 最初の Decision Policy は、toy example として次の3段階でよい。
 
 | 条件 | decision | 意味 |
 | --- | --- | --- |
 | `risk_score` が低い | `no_action` | 候補化しない |
-| `risk_score` が中程度に高い | `review_required` | reviewer が確認する候補 |
-| `risk_score` が非常に高い | `auto_action_candidate` | dry-run worker の対象候補 |
+| `risk_score` が中程度に高い | `action_candidate` + `standard` | 後続対応の標準優先度候補 |
+| `risk_score` が非常に高い | `action_candidate` + `high` | 後続対応の高優先度候補 |
 
-この段階でも、`dry_run = true` を基本にする。学習リポジトリでは実停止、実DB、実SQS、外部API呼び出しは扱わない。
+この段階では、候補を手動で扱うか、自動 worker が読むか、dry-run にするかは決めない。`ActionCandidate` はあくまで「後続対応候補である」という判断を表す。処理方法の詳細は Review Queue や Action Worker の責務として後段に分ける。
