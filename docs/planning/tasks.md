@@ -138,11 +138,11 @@
 
 ## Phase 8: Design Map and Concept Alignment
 
-- [ ] `docs/learning/design_map.md` を作る
-- [ ] `docs/design/evaluation_harness_architecture_mermaid_ja.md` と既存実装の対応を表にする
-- [ ] `docs/design/production_scoring_architecture_mermaid_ja.md` と次に作る概念の対応を表にする
-- [ ] 評価基盤から本番スコアリング運用へ進む Mermaid 図を作る
-- [ ] `score_results` / `action_candidates` / `action_executions` を分ける理由を説明する
+- [x] `docs/learning/design_map.md` を作る
+- [x] `docs/design/evaluation_harness_architecture_mermaid_ja.md` と既存実装の対応を表にする
+- [x] `docs/design/production_scoring_architecture_mermaid_ja.md` と次に作る概念の対応を表にする
+- [x] 評価基盤から本番スコアリング運用へ進む Mermaid 図を作る
+- [x] `score_results` / `action_candidates` / `action_executions` を分ける理由を説明する
 
 ## Phase 9: ScoreResult and Decision Policy Simulation
 
