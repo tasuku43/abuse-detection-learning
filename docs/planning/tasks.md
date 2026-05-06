@@ -29,7 +29,7 @@
 
 ## Phase 2: Notebook Workflow
 
-- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [x] `notebooks/01_evaluate_scoring.ipynb` を作る
 - [x] fixture CSV を読み込む
 - [x] `scoring_fn` を適用する
@@ -46,7 +46,7 @@
 
 ## Phase 3: dbt Skeleton
 
-- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [x] `dbt/dbt_project.yml` を作る
 - [x] staging model skeleton を作る
 - [x] human label source skeleton を作る
@@ -58,7 +58,7 @@
 
 ## Phase 3.5: Local SQLite Warehouse
 
-- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [x] SQLite raw table schema を作る
 - [x] synthetic account attributes を seed する
 - [x] synthetic user behavior logs を seed する
@@ -72,7 +72,7 @@
 
 ## Phase 4: Error Analysis
 
-- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [x] false positives を取り出す helper を作る
 - [x] false negatives を取り出す helper を作る
 - [x] score bucket ごとの観察方法を考える
@@ -81,7 +81,7 @@
 
 ## Phase 5: ML Baseline
 
-- [x] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [x] `src/abuse_detection/ml_baseline.py` を作る
 - [x] logistic regression で fixture feature rows を学習する
 - [x] ML model の出力を 0 から 100 の `risk_score` に変換する
@@ -119,11 +119,11 @@
 
 ## Learning Review
 
-- [x] Phase 0〜7 の学びを `docs/learning_review.md` にまとめる
+- [x] Phase 0〜7 の学びを `docs/learning/learning_review.md` にまとめる
 
 ## Production Gap Analysis
 
-- [x] 学習 repo と本番システムの差分を `docs/production_gap_analysis.md` にまとめる
+- [x] 学習 repo と本番システムの差分を `docs/learning/production_gap_analysis.md` にまとめる
 
 ## Roadmap Repositioning
 
@@ -131,13 +131,14 @@
 - [x] `docs/design/` を public repo 前提の架空設計として、具体的な業務名詞を抽象表現へ寄せる
 - [x] `docs/design/` の Mermaid 図にデータストア形状、判断ノード、処理ノード、色分けを追加する
 - [x] `docs/design/` から学習プロセスや推奨実装タスクの節を外し、純粋な設計書として整理する
-- [x] `docs/roadmap.md` を `docs/design` 理解用のロードマップとして組み直す
+- [x] `docs/planning/roadmap.md` を `docs/design` 理解用のロードマップとして組み直す
 - [x] `README.md` の位置づけを、評価基盤単体から設計理解用プロジェクトへ更新する
 - [x] `AGENTS.md` の冒頭を Phase 8 以降の方針に合わせて更新する
+- [x] `docs/` を `design/`、`planning/`、`process/`、`learning/`、`progress/` に整理する
 
 ## Phase 8: Design Map and Concept Alignment
 
-- [ ] `docs/design_map.md` を作る
+- [ ] `docs/learning/design_map.md` を作る
 - [ ] `docs/design/evaluation_harness_architecture_mermaid_ja.md` と既存実装の対応を表にする
 - [ ] `docs/design/production_scoring_architecture_mermaid_ja.md` と次に作る概念の対応を表にする
 - [ ] 評価基盤から本番スコアリング運用へ進む Mermaid 図を作る
@@ -145,7 +146,7 @@
 
 ## Phase 9: ScoreResult and Decision Policy Simulation
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [ ] `src/abuse_detection/production_schema.py` を作る
 - [ ] `ScoreResult` / `DecisionResult` / `ActionCandidate` を定義する
 - [ ] `src/abuse_detection/decision_policy.py` を作る
@@ -156,7 +157,7 @@
 
 ## Phase 10: Local Append-only Log Simulation
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [ ] `src/abuse_detection/local_log_store.py` を作る
 - [ ] `scripts/build_action_candidates.py` を作る
 - [ ] `score_results` JSONL を `data_lake/` 配下に出力する
@@ -166,7 +167,7 @@
 
 ## Phase 11: Review Queue Simulation
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [ ] `scripts/review_queue_summary.py` を作る
 - [ ] open な action candidates を一覧できるようにする
 - [ ] risk_score 降順で並べられるようにする
@@ -175,7 +176,7 @@
 
 ## Phase 12: Dry-run Action Worker Simulation
 
-- [ ] 実装前に `docs/pre_implementation_checklist.md` に沿って説明する
+- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
 - [ ] `src/abuse_detection/action_worker.py` を作る
 - [ ] `scripts/run_dry_run_worker.py` を作る
 - [ ] action_candidates を読み込めるようにする
@@ -187,7 +188,7 @@
 
 ## Phase 13: Feedback Loop Back to Evaluation
 
-- [ ] `docs/production_to_evaluation_feedback.md` を作る
+- [ ] `docs/learning/production_to_evaluation_feedback.md` を作る
 - [ ] synthetic review result fixture を作る
 - [ ] human review result から `label_events_human` 相当を作る toy flow を整理する
 - [ ] auto decision を teacher label に混ぜない流れを図解する

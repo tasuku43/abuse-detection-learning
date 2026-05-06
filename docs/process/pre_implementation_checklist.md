@@ -26,7 +26,7 @@
 - [ ] テストで何を確認しているか説明した
 - [ ] 可能なら `pytest -q` を実行した
 - [ ] `docs/progress/` に学びを残した
-- [ ] `docs/tasks.md` を更新した
+- [ ] `docs/planning/tasks.md` を更新した
 
 ## 省略禁止ルール
 

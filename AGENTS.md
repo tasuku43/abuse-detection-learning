@@ -126,9 +126,9 @@ scored rows -> ScoreResult -> Decision Policy -> ActionCandidate -> Review Queue
 4. 実装したコードを一緒に読むための説明をする
 5. テストで何を確認しているか説明する
 6. `docs/progress/` に学びを残す
-7. `docs/tasks.md` を更新する
+7. `docs/planning/tasks.md` を更新する
 
-詳細な進め方は `docs/agent_workflow.md` を参照します。
+詳細な進め方は `docs/process/agent_workflow.md` を参照します。
 
 ## セッション再開時の手順
 
@@ -137,7 +137,7 @@ scored rows -> ScoreResult -> Decision Policy -> ActionCandidate -> Review Queue
 最低限、次を確認します。
 
 1. `git status --short`
-2. `docs/tasks.md`
+2. `docs/planning/tasks.md`
 3. `docs/progress/` の最新日付ファイル
 4. 未コミット変更の内容
 
