@@ -22,5 +22,6 @@ models/*/
 
 # OS / editor
 .DS_Store
+.obsidian/
 .idea/
 .vscode/
