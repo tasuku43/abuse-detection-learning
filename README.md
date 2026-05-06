@@ -60,7 +60,7 @@ ScoreResult
   scorer が出した時点ごとの score 履歴
 
 Decision Policy
-  score を review_required / auto_suspend_candidate / no_action へ変換するルール
+  score を action_candidate / no_action へ変換するルール
 
 ActionCandidate
   後続対応の候補になったという履歴
@@ -230,6 +230,21 @@ pip install -e ".[dev]"
 ```bash
 pytest -q
 ```
+
+Scoring API をローカルで起動する場合:
+
+```bash
+uvicorn abuse_detection.scoring_api:app --reload
+```
+
+Docker で起動する場合:
+
+```bash
+docker build -t abuse-detection-scoring-api .
+docker run --rm -p 8000:8000 abuse-detection-scoring-api
+```
+
+Scoring API は `ScoreResult` だけを返します。`ActionCandidate` の生成や action 実行は、scheduled job や worker 側の責務として分けます。
 
 SQLite warehouse から feature rows CSV を作る場合:
 

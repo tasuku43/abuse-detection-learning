@@ -158,7 +158,10 @@
 ## Phase 10: Local Append-only Log Simulation
 
 - [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
+- [x] HTTP Scoring API を作る
+- [x] Docker で Scoring API を起動できるようにする
 - [x] `src/abuse_detection/local_log_store.py` を作る
+- [x] `scripts/build_score_results.py` を作る
 - [x] `scripts/build_action_candidates.py` を作る
 - [x] `score_results` JSONL を `data_lake/` 配下に出力する
 - [x] `action_candidates` JSONL を `data_lake/` 配下に出力する
