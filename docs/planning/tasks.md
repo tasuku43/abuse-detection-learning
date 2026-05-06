@@ -167,12 +167,12 @@
 
 ## Phase 11: Review Queue Simulation
 
-- [ ] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
-- [ ] `scripts/review_queue_summary.py` を作る
-- [ ] open な action candidates を一覧できるようにする
-- [ ] risk_score 降順で並べられるようにする
-- [ ] `decision` / `candidate_status` で filter できるようにする
-- [ ] 外部管理画面 link を placeholder として表現する
+- [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
+- [x] `scripts/review_queue_summary.py` を作る
+- [x] open な action candidates を一覧できるようにする
+- [x] risk_score 降順で並べられるようにする
+- [x] `decision` / `candidate_status` で filter できるようにする
+- [x] 外部管理画面 link を placeholder として表現する
 
 ## Phase 12: Dry-run Action Worker Simulation
 
