@@ -144,6 +144,21 @@
 - [x] 評価基盤から本番スコアリング運用へ進む Mermaid 図を作る
 - [x] `score_results` / `action_candidates` / `action_executions` を分ける理由を説明する
 
+## Design Doc Refinement
+
+- [x] 運用スコアリング設計を3レイヤー構成で説明し直す
+- [x] Scoring Service Layer（スコア提供レイヤー）を定義する
+- [x] Candidate Generation Layer（候補生成レイヤー）を定義する
+- [x] Candidate Consumption Layer（候補利用レイヤー）を定義する
+- [x] ログ・Queue・DB・Deployment Units をレイヤー横断論点として整理する
+- [x] 評価基盤設計を5レイヤー構成で説明し直す
+- [x] Evaluation Dataset Layer（評価データセット作成レイヤー）を定義する
+- [x] Point-in-Time Feature Layer（時点特徴量生成レイヤー）を定義する
+- [x] Scoring Experiment Layer（スコアリング実験レイヤー）を定義する
+- [x] Evaluation Metrics Layer（評価指標レイヤー）を定義する
+- [x] Error Analysis / Improvement Layer（誤差分析・改善レイヤー）を定義する
+- [x] feature row を永続テーブル前提ではなく Feature Builder の中間出力として整理する
+
 ## Phase 9: ScoreResult and Decision Policy Simulation
 
 - [x] 実装前に `docs/process/pre_implementation_checklist.md` に沿って説明する
